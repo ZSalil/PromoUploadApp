@@ -14,7 +14,7 @@ import store from './store.js'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <BrowserRouter basename="/order-upload">
+  <BrowserRouter basename="/order-uploader">
     <Provider store={store}>
       <App />
     </Provider>
