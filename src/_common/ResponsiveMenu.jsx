@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router';
 import { logout } from "../_actions/auth";
 
 
-const pages = [{ name: "Generate Order", url: "generate-order" }];
+const pages = [{ name: "Retail Order", url: "/order" },{ name: "Wholesale Order", url: "/wholesale-order" }];
 
 const ResponsiveMenu = (props) => {
 
@@ -94,8 +94,8 @@ const ResponsiveMenu = (props) => {
 
               {user && pages.map((page, index) => (
                 <MenuItem key={page}  onClick={handleCloseNavMenu}>
-                  <Link to={"/order"} key={index} className="nav-link">
-                    {page.name}
+                  <Link to={page.url} key={index} className="nav-link">
+                    {page.name} 
                   </Link>
                 </MenuItem>
               ))}
@@ -113,7 +113,7 @@ const ResponsiveMenu = (props) => {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {user && pages.map((page,index) => (
-              <Link to={"/order"} key={index} className="nav-link text-white">
+              <Link to={page.url} key={index} className="nav-link text-white">
                 {page.name}
               </Link>
             ))}

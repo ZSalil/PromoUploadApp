@@ -1,0 +1,168 @@
+import React from "react";
+import Stack from "@mui/material/Stack";
+import DragAndDrop from "./DragAndDrop";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+import TextField from "@mui/material/TextField";
+import { OrderContext } from "./OrderProvider";
+import Button from "@mui/material/Button";
+import { LoadingButton } from "@mui/lab";
+import AutoFixHighTwoToneIcon from "@mui/icons-material/AutoFixHighTwoTone";
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+const OrderSideBar = () => {
+  const {
+    selectedValues,
+    handleChange,
+    onSubmit,
+    isLoading,
+    handleProcess,
+    dataProcessed,
+    isSubmittable,
+  } = React.useContext(OrderContext);
+  const [orderType, setOrderType] = React.useState('retail');
+  const handleOrderTypeChange = (event) => {
+    setOrderType(event.target.value);
+  };
+  return (
+    <>
+      <Stack spacing={2}>
+      <FormControl>
+      <FormLabel id="demo-controlled-radio-buttons-group">Order Type</FormLabel>
+      <ToggleButtonGroup
+      color="primary"
+      value={orderType}
+      exclusive
+      onChange={handleOrderTypeChange}
+    >
+      <ToggleButton value="retail">Retail</ToggleButton>
+      <ToggleButton value="wholesale">Wholesale</ToggleButton>
+    </ToggleButtonGroup>
+    </FormControl>
+        <DragAndDrop />
+
+        <TextField
+          InputLabelProps={{ shrink: true }}
+          name="po_number"
+          value={selectedValues?.po_number?.value}
+          id="standard-basic"
+          onChange={handleChange}
+          label="PO Number"
+          variant="standard"
+        />
+        <TextField
+          InputLabelProps={{ shrink: true }}
+          name="customer_account"
+          value={selectedValues?.customer_account?.value}
+          id="standard-basic"
+          onChange={handleChange}
+          label="Customer Account"
+          variant="standard"
+        />
+       {orderType === 'retail' ? <FormControl>
+          <FormLabel
+            id="demo-controlled-radio-buttons-group"
+            className="fw-bold"
+          >
+            Retail Order Upload
+          </FormLabel>
+          <FormLabel
+            id="demo-controlled-radio-buttons-group"
+            className="fw-bold"
+          >
+            Company To create Order In
+          </FormLabel>
+          <RadioGroup
+            aria-labelledby="demo-controlled-radio-buttons-group"
+            name="source"
+            value={selectedValues?.source?.value}
+            onChange={handleChange}
+          >
+            <FormControlLabel
+              value="jrau"
+              control={<Radio />}
+              label="Jaycar AU"
+            />
+            <FormControlLabel
+              value="jrnz"
+              control={<Radio />}
+              label=" Jaycar NZ"
+            />
+            <FormControlLabel
+              value="nzau"
+              control={<Radio />}
+              label="Jaycar NZ (supply from Australia)"
+            />
+            <FormControlLabel value="rtau" control={<Radio />} label="RTM AU" />
+          </RadioGroup>
+        </FormControl> : ''}
+       {orderType === 'wholesale' ? <FormControl>
+          <FormLabel
+            id="demo-controlled-radio-buttons-group"
+            className="fw-bold"
+          >
+            Wholesale Order Upload
+          </FormLabel>
+          <FormLabel
+            id="demo-controlled-radio-buttons-group"
+            className="fw-bold"
+          >
+            Company To create Order In
+          </FormLabel>
+          <RadioGroup
+            aria-labelledby="demo-controlled-radio-buttons-group"
+            name="source"
+            value={selectedValues?.electus?.sdau}
+            onChange={handleChange}
+          >
+            <FormControlLabel
+              value="edau"
+              control={<Radio />}
+              label="Electus Au (edau)"
+            />
+            <FormControlLabel
+              value="tbnz"
+              control={<Radio />}
+              label="Electus NZ (tbnz)"
+            />
+            <FormControlLabel
+              value="sdau"
+              control={<Radio />}
+              label="Electus Wholesale Au (edau)"
+            />
+            <FormControlLabel
+              value="sdnz"
+              control={<Radio />}
+              label="Electus Wholesale NZ (sdnz)"
+            />
+          </RadioGroup>
+        </FormControl> : ''} 
+        {dataProcessed ? (
+          <LoadingButton
+            onClick={handleProcess}
+            endIcon={<AutoFixHighTwoToneIcon />}
+            loading={isLoading}
+            loadingPosition="end"
+            variant="contained"
+          >
+            Process Data
+          </LoadingButton>
+        ) : (
+          ""
+        )}
+        {isSubmittable ? (
+          <Button variant="contained" onClick={onSubmit}>
+            Submit
+          </Button>
+        ) : (
+          ""
+        )}
+      </Stack>
+    </>
+  );
+};
+
+export default OrderSideBar;

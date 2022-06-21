@@ -1,9 +1,7 @@
 import * as React from "react";
-import { useMemo, useRef } from "react";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import DragAndDrop from "./DragAndDrop";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -12,6 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
+import clsx from 'clsx';
 import {
   GridRowModes,
   DataGrid,
@@ -24,6 +23,10 @@ import {
 } from "@mui/x-data-grid-generator";
 import { OrderContext } from "./OrderProvider";
 import OrderSideBar from './OrderSideBar';
+import { connect } from 'react-redux';
+
+
+
 function EditToolbar(props) {
   const { setRows, setRowModesModel } = props;
 
@@ -64,13 +67,17 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-const OrderTable = () => {
-  const { items } = React.useContext(OrderContext);
+const OrderTable = ({dispatch}) => {
+  const { items, setFinalList } = React.useContext(OrderContext);
   const [rows, setRows] = React.useState(items);
   const [rowModesModel, setRowModesModel] = React.useState({});
   React.useEffect(() => {
     setRows(items);
   }, [items]);
+
+  React.useEffect(() => {
+    setFinalList(rows);
+  }, [rows]);
   const handleRowEditStart = (params, event) => {
     event.defaultMuiPrevented = true;
   };
@@ -84,7 +91,10 @@ const OrderTable = () => {
   };
 
   const handleSaveClick = (id) => () => {
+    console.log(id);
+    setFinalList(rows)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+
   };
 
   const handleDeleteClick = (id) => () => {
@@ -101,6 +111,7 @@ const OrderTable = () => {
     if (editedRow.isNew) {
       setRows(rows.filter((row) => row.id !== id));
     }
+
   };
 
   const processRowUpdate = (newRow) => {
@@ -123,6 +134,39 @@ const OrderTable = () => {
       field: "quantity",
       headerName: "Quantity",
       type: "number",
+      align: "center",
+      headerAlign: "center",
+      editable: true,
+      flex: 1,
+    },
+    {
+      field: "free_stock",
+      headerName: "Available Stock",
+      type: "number",
+      align: "center",
+      headerAlign: "center",
+      editable: true,
+      flex: 1,
+    },
+    {
+      field: "uom",
+      headerName: "Unit",
+      align: "center",
+      headerAlign: "center",
+      editable: true,
+      flex: 1,
+    },
+    {
+      field: "location",
+      headerName: "Location",
+      align: "center",
+      headerAlign: "center",
+      editable: true,
+      flex: 1,
+    },
+    {
+      field: "adn",
+      headerName: "ADN",
       align: "center",
       headerAlign: "center",
       editable: true,
@@ -190,6 +234,12 @@ const OrderTable = () => {
               "& .textPrimary": {
                 color: "text.primary",
               },
+              '& .row-error': {
+                bgcolor: '#ff171796',
+                '&:hover': {
+                  bgcolor: '#ff1717bd'
+                },
+              },
             }}
           >
             <DataGrid
@@ -210,6 +260,15 @@ const OrderTable = () => {
                 toolbar: { setRows, setRowModesModel },
               }}
               experimentalFeatures={{ newEditingApi: true }}
+              getRowClassName={(params) => {
+                if(params?.row?.free_stock)
+                {
+                  return clsx({'row-error':parseInt(params?.row?.quantity) > parseInt(params?.row?.free_stock)});
+                }
+               else {
+                return '';
+               }
+              }}
             />
           </Box>
         </Item>
@@ -222,4 +281,12 @@ const OrderTable = () => {
   );
 };
 
-export default OrderTable;
+
+function mapStateToProps(state) {
+  const { user } = state.auth;
+  return {
+    user,
+  };
+}
+
+export default connect(mapStateToProps)(OrderTable);
