@@ -53,3 +53,9 @@
   border-style: dotted;
   padding: 1rem;
 }
+
+
+.selected-nav {
+  background-color: #0006;
+  border-radius: 10px;
+}

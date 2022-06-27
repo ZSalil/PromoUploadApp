@@ -7,6 +7,7 @@ const WholesaleOrder = () => {
     <div>
       <React.StrictMode>
         <OrderProvider>
+       
           <OrderTable />
         </OrderProvider>
       </React.StrictMode>

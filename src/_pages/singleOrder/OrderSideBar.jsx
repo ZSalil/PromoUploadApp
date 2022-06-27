@@ -13,6 +13,7 @@ import { LoadingButton } from "@mui/lab";
 import AutoFixHighTwoToneIcon from "@mui/icons-material/AutoFixHighTwoTone";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Typography from '@mui/material/Typography';
 const OrderSideBar = () => {
   const {
     selectedValues,
@@ -30,8 +31,11 @@ const OrderSideBar = () => {
   return (
     <>
       <Stack spacing={2}>
+      <Typography variant="h4" className="border-bottom pb-2 border-success" component="div" gutterBottom>
+        Single Order
+      </Typography>
       <FormControl>
-      <FormLabel id="demo-controlled-radio-buttons-group">Order Type</FormLabel>
+      <FormLabel id="demo-controlled-radio-buttons-group" className="fw-bold">Order Type</FormLabel>
       <ToggleButtonGroup
       color="primary"
       value={orderType}
@@ -140,8 +144,9 @@ const OrderSideBar = () => {
             />
           </RadioGroup>
         </FormControl> : ''} 
-        {dataProcessed ? (
+       
           <LoadingButton
+            disabled={!dataProcessed}
             onClick={handleProcess}
             endIcon={<AutoFixHighTwoToneIcon />}
             loading={isLoading}
@@ -150,16 +155,11 @@ const OrderSideBar = () => {
           >
             Process Data
           </LoadingButton>
-        ) : (
-          ""
-        )}
-        {isSubmittable ? (
-          <Button variant="contained" onClick={onSubmit}>
+     
+        
+          <Button variant="contained" disabled={!isSubmittable} onClick={onSubmit}>
             Submit
           </Button>
-        ) : (
-          ""
-        )}
       </Stack>
     </>
   );

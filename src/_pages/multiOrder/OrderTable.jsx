@@ -4,20 +4,12 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import SaveIcon from "@mui/icons-material/Save";
-import CancelIcon from "@mui/icons-material/Close";
 import Alert from "@mui/material/Alert";
 import clsx from "clsx";
 import "./OrderTable.css";
 import {
-  GridRowModes,
   DataGrid,
   GridToolbarContainer,
-  GridActionsCellItem,
   GridToolbar,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
@@ -25,21 +17,11 @@ import { OrderContext } from "./OrderProvider";
 import OrderSideBar from "./OrderSideBar";
 import { connect } from "react-redux";
 import { CustomFooter } from "./CustomFooter";
-
+import LinearProgress from '@mui/material/LinearProgress';
 function EditToolbar(props) {
   const { setRows, setRowModesModel } = props;
 
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [
-      { id, part_number: "", quantity: "", isNew: true },
-      ...oldRows,
-    ]);
-    setRowModesModel((oldModel) => ({
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "part_number" },
-      ...oldModel,
-    }));
-  };
+
 
   return (
     <GridToolbarContainer className="justify-content-between">
@@ -65,7 +47,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const OrderTable = ({ dispatch }) => {
-  const { items, setFinalList, message, columns, setColumns } =
+  const { items, setFinalList, message,isLoading, columns, setColumns } =
     React.useContext(OrderContext);
   const [rows, setRows] = React.useState(items);
 
@@ -92,7 +74,6 @@ const OrderTable = ({ dispatch }) => {
     if (parseInt(prams?.total) < 1) {
       inValid = true;
     }
-    console.log(prams);
     if (parseInt(prams?.total) > parseInt(prams?.free_stock)) {
       inValid = true;
     }
@@ -105,31 +86,7 @@ const OrderTable = ({ dispatch }) => {
     setColumnData(params?.row);
   };
 
-  const handleEditClick = (id) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
 
-  const handleSaveClick = (id) => () => {
-    console.log(id);
-    setFinalList(rows);
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-  };
-
-  const handleDeleteClick = (id) => () => {
-    setRows(rows.filter((row) => row.id !== id));
-  };
-
-  const handleCancelClick = (id) => () => {
-    setRowModesModel({
-      ...rowModesModel,
-      [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    });
-
-    const editedRow = rows.find((row) => row.id === id);
-    if (editedRow.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
-    }
-  };
 
   const processRowUpdate = (newRow) => {
     const updatedRow = { ...newRow, isNew: false };
@@ -230,7 +187,9 @@ const OrderTable = ({ dispatch }) => {
   // ];
   return (
     <Grid container className="pb-4" spacing={2}>
+      
       <Grid item xs={8}>
+     {isLoading && <LinearProgress />} 
         <Item>
           <Box
             sx={{
@@ -288,7 +247,7 @@ const OrderTable = ({ dispatch }) => {
             <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300}}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message}</ul>`,
+                  __html: `<ul style="text-align: left;">${message}</ul>`
                 }}
               />
             </Alert>

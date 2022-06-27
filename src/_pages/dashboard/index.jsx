@@ -1,11 +1,14 @@
-import * as React from 'react';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import * as React from "react";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Typography from "@mui/material/Typography";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DashboardProvider from "./DashboardProvider";
+import DashboardOrderTable from "./DashboardOrderTable";
 
 const Dashboard = () => {
+
   return (
     <div>
       <Accordion>
@@ -18,10 +21,16 @@ const Dashboard = () => {
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-           On that tab you can Upload Order for Retail or Wholesale.
+            On that tab you can Upload Order for Retail or Wholesale.
           </Typography>
         </AccordionDetails>
       </Accordion>
+
+      <React.StrictMode>
+        <DashboardProvider>
+          <DashboardOrderTable/>
+        </DashboardProvider>
+      </React.StrictMode>
       {/* <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -47,7 +56,7 @@ const Dashboard = () => {
         </AccordionSummary>
       </Accordion> */}
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

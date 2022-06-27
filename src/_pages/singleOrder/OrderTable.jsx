@@ -11,6 +11,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import clsx from 'clsx';
+import LinearProgress from '@mui/material/LinearProgress';
 import {
   GridRowModes,
   DataGrid,
@@ -24,6 +25,7 @@ import {
 import { OrderContext } from "./OrderProvider";
 import OrderSideBar from './OrderSideBar';
 import { connect } from 'react-redux';
+import { Alert } from "@mui/material";
 
 
 
@@ -68,7 +70,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const OrderTable = ({dispatch}) => {
-  const { items, setFinalList } = React.useContext(OrderContext);
+  const { items, setFinalList,message ,isLoading} = React.useContext(OrderContext);
   const [rows, setRows] = React.useState(items);
   const [rowModesModel, setRowModesModel] = React.useState({});
   React.useEffect(() => {
@@ -221,9 +223,19 @@ const OrderTable = ({dispatch}) => {
     },
   ];
   return (
-    <Grid container spacing={2}>
+    <Grid container className="pb-4" spacing={2}>
       <Grid item xs={8}>
+      {isLoading && <LinearProgress />} 
         <Item>
+        {message && message?.success && (
+            <Alert sx={{width: "100%"}}severity="success" style={{ marginTop: 8,maxHeight: 300}}>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `<ul style="text-align: left;">${message?.success?.toString()}</ul>`
+                }}
+              />
+            </Alert>
+          )}
           <Box
             sx={{
               height:"80vh",
@@ -271,6 +283,15 @@ const OrderTable = ({dispatch}) => {
               }}
             />
           </Box>
+          {message && message?.warning && (
+            <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300}}>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `<ul style="text-align: left;">${message?.warning?.toString()}</ul>`
+                }}
+              />
+            </Alert>
+          )}
         </Item>
       </Grid>
       <Grid item xs={4}>

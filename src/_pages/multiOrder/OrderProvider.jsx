@@ -8,6 +8,15 @@ import { toast } from "react-toastify";
 import Papa from "papaparse";
 import { difference, keyBy, merge, slice, sum, uniq, uniqBy, values } from "lodash";
 
+const defaultColumn = [    {
+  field: "product_number",
+  headerName: "Product Number",
+  align: "center",
+  headerAlign: "center",
+  width: 180,
+  editable: true,
+},]
+
 export const OrderContext = React.createContext({
   selectedValues: {},
   handleChange() {},
@@ -45,17 +54,8 @@ const OrderProvider = (props) => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = React.useState();
-  const [columns, setColumns] = React.useState([
-    {
-      field: "product_number",
-      headerName: "Product Number",
-      align: "center",
-      headerAlign: "center",
-      width: 180,
-      editable: true,
-    },
-    
-  ]);
+  const [isSubmittable, setIsSubmittable] = React.useState(false);
+  const [columns, setColumns] = React.useState([]);
   const [finalList, setFinalList] = React.useState([]);
   const [dataProcessed, setDataProcessed] = React.useState(false);
 
@@ -85,6 +85,7 @@ const OrderProvider = (props) => {
 
   const processMultiCustomerOrder = (props) => {
     setIsLoading(true);
+    setMessage(null);
     OrderService.processMultiCustomerOrder(props).then(({ data }) => {
       setDataProcessed(false);
       const newArray = merge(
@@ -96,6 +97,14 @@ const OrderProvider = (props) => {
       setFinalList(_newArray);
       setMessage(data?.message)
       setIsLoading(false);
+      if(!data?.orderArray)
+      {
+        toast.error('Something Wrong With the Data')
+      }
+      else
+      {
+        setIsSubmittable(true);
+      }
     }).catch(_ => {
       setDataProcessed(false);
       setIsLoading(false);
@@ -103,6 +112,8 @@ const OrderProvider = (props) => {
   };
 
   const processCsv = (file) => {
+    setMessage(null);
+    setItems([])
     Papa.parse(file, {
       header: false,
       skipEmptyLines:true,
@@ -121,7 +132,7 @@ const OrderProvider = (props) => {
       dynamicTyping: true,
       skipEmptyLines:true,
       complete: function ({ data, meta: { fields } }) {
-        if (data?.length > 1) {
+        if (data?.length > 0) {
           let newProcessedArray = data.map((obj, index) =>{
             let qtyObj = Object.assign({}, obj);
             delete qtyObj[Object.keys(qtyObj)[Object.keys(qtyObj).length - 1]];
@@ -143,7 +154,7 @@ const OrderProvider = (props) => {
               flex: 1,
             });
           });
-          setColumns([...columns, ...newColumn,{
+          setColumns([...defaultColumn, ...newColumn,{
             field: "total",
             headerName: "Total Order",
             type: "number",
@@ -188,7 +199,7 @@ const OrderProvider = (props) => {
     });
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     const duplicate = isProductUnique();
     if (duplicate.length) {
       toast.warning(
@@ -201,12 +212,17 @@ const OrderProvider = (props) => {
       ).length
     ) {
       let object = {
-        products: items,
-        po_number: selectedValues?.po_number?.value,
+        raw_data: selectedValues?.rawValue?.value,
         source: selectedValues?.source?.value,
-        customer_array: selectedValues?.updatedRows?.value,
       };
-
+      setIsLoading(true);
+      setMessage(null);
+     await OrderService.saveMultiCustomerOrder(object).then(({ data }) => {
+        setMessage(data?.message)
+        setIsLoading(false);
+      }).catch(_ => {
+        setIsLoading(false);
+      });
       toast.success("Submit Successfully");
     } else {
       toast.error("Please Fix or remove the red rows");
@@ -225,6 +241,7 @@ const OrderProvider = (props) => {
     <OrderContext.Provider
       value={{
         columns,
+        isSubmittable,
         message, setMessage,
         setColumns,
         handleFormValueUpdate,

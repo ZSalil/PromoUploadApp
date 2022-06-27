@@ -16,14 +16,14 @@ import { useNavigate } from 'react-router';
 import { logout } from "../_actions/auth";
 
 
-const pages = [{ name: "Retail Order", url: "/order" },{ name: "Wholesale Order", url: "/wholesale-order" }];
+const pages = [{ name: "Single Order", url: "/order" },{ name: "Multi Order", url: "/multi-order" }];
 
 const ResponsiveMenu = (props) => {
 
   const {user,dispatch} = props;
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  // const [pages, setPages] = React.useState([]);
+  const [selectedPage, setSelectedPage] = React.useState(null);
   const navigate = useNavigate();
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -57,7 +57,7 @@ const ResponsiveMenu = (props) => {
             component="div"
             sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
           >
-            <Link to={"/"} className="navbar-brand text-white">
+            <Link to={"/"} onClick={()=>setSelectedPage('dashboard')}  className="navbar-brand text-white">
             {process.env.REACT_APP_BRAND_NAME}<sup>{process.env.REACT_APP_VERSION}</sup>
             </Link>
           </Typography>
@@ -94,7 +94,7 @@ const ResponsiveMenu = (props) => {
 
               {user && pages.map((page, index) => (
                 <MenuItem key={page}  onClick={handleCloseNavMenu}>
-                  <Link to={page.url} key={index} className="nav-link">
+                  <Link to={page.url} onClick={()=>setSelectedPage(page.name)} key={index} className="nav-link">
                     {page.name} 
                   </Link>
                 </MenuItem>
@@ -107,13 +107,13 @@ const ResponsiveMenu = (props) => {
             component="div"
             sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}
           >
-            <Link to={"/"} className="navbar-brand text-white">
+            <Link onClick={()=>setSelectedPage('dashboard')} to={"/"} className="navbar-brand text-white">
             {process.env.REACT_APP_BRAND_NAME}
             </Link>
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {user && pages.map((page,index) => (
-              <Link to={page.url} key={index} className="nav-link text-white">
+              <Link onClick={()=>setSelectedPage(page.name)} key={index}  to={page.url}  className={"nav-link text-white "+(selectedPage === page?.name ? 'selected-nav' : '') }>
                 {page.name}
               </Link>
             ))}
@@ -158,7 +158,7 @@ const ResponsiveMenu = (props) => {
               </React.Fragment>
             ) : (
               <React.Fragment>
-                <Link to={"/login"} className="nav-link text-white">
+                <Link  to={"/login"} className="nav-link text-white">
                 Login
                 </Link>
               </React.Fragment>

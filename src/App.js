@@ -20,12 +20,12 @@ import { history } from './_helpers/history';
 // import AuthVerify from "./common/auth-verify";
 import EventBus from "./_common/EventBus";
 import Login from './_components/login.component';
-import Order from './_pages/retailOrder/index';
+import Order from './_pages/singleOrder/index';
 import ResponsiveMenu from './_common/ResponsiveMenu';
 import Dashboard from './_pages/dashboard/index';
 import LogOut from './_components/LogOut';
 import Alert from './_common/Alert';
-import WholesaleOrder from './_pages/wholesaleOrder/index';
+import WholesaleOrder from './_pages/multiOrder/index';
 
 class App extends Component {
   constructor(props) {
@@ -85,7 +85,7 @@ class App extends Component {
             {/* <Route path="/dashboard" element={<Dashboard />} /> */}
             {/* {/* <Route path="/" element={<Dashboard />} /> */}
             <Route path="/order" element={<Order />} />
-            <Route path="/wholesale-order" element={<WholesaleOrder />} />
+            <Route path="/multi-order" element={<WholesaleOrder />} />
             <Route path="/logout" element={<LogOut />} />
             {/* <Route exact path="/register" component={Register} />
             <Route exact path="/profile" component={Profile} />
