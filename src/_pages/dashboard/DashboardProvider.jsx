@@ -77,8 +77,12 @@ const DashboardProvider = (props) => {
   const update = async (params) => {
     let qString;
     let obj = {
-      ...params,
     };
+
+    if(params?.search_text)
+    {
+      obj.search_kw =params.search_text
+    }
 
     if (selectedValues?.search_text?.value && params?.search_text !== "empty") {
       obj.search_kw = selectedValues?.search_text?.value;

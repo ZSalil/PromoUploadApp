@@ -1,37 +1,23 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import AddIcon from "@mui/icons-material/Add";
-import clsx from "clsx";
 import LinearProgress from "@mui/material/LinearProgress";
 import {
-  GridRowModes,
   DataGrid,
   GridToolbarContainer,
-  GridActionsCellItem,
-  gridPageCountSelector,
-  gridPageSelector,
-  useGridApiContext,
-  useGridSelector,
   GridToolbar,
 } from "@mui/x-data-grid";
-import { randomId } from "@mui/x-data-grid-generator";
 import { DashboardContext } from "./DashboardProvider";
 import { connect } from "react-redux";
-import { Alert } from "@mui/material";
-import InputLabel from "@mui/material/InputLabel";
 import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
 import Input from "@mui/material/Input";
 import SearchIcon from "@mui/icons-material/Search";
 import Pagination from "@mui/material/Pagination";
 import PaginationItem from "@mui/material/PaginationItem";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
+
 import IconButton from "@mui/material/IconButton";
 import PreviewIcon from "@mui/icons-material/Preview";
 import OrderItemTable from "./OrderItemTable";
@@ -68,9 +54,9 @@ function CustomPagination() {
 }
 
 function Toolbar(props) {
-  const { setRows, setRowModesModel } = props;
+
   const { handleSearch } = React.useContext(DashboardContext);
-  const handleClick = () => {};
+
 
   return (
     <GridToolbarContainer className="justify-content-between">
@@ -168,15 +154,8 @@ const DashboardDashboardTable = ({ dispatch }) => {
       flex: 1,
     },
     {
-      field: "vih_order ",
-      headerName: "Order",
-      align: "center",
-      headerAlign: "center",
-      flex: 1,
-    },
-    {
-      field: "location",
-      headerName: "Location",
+      field: "vih_order",
+      headerName: "No. Order Lines",
       flex: 1,
       renderCell: (params) => (
         <div>
@@ -184,7 +163,6 @@ const DashboardDashboardTable = ({ dispatch }) => {
           <IconButton
             color="primary"
             onClick={()=>handleOpen(params?.row?.vih_reference)}
-            aria-label="upload picture"
             component="span"
           >
             <PreviewIcon />
