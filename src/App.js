@@ -27,6 +27,37 @@ import LogOut from './_components/LogOut';
 import Alert from './_common/Alert';
 import WholesaleOrder from './_pages/multiOrder/index';
 
+
+import axios from 'axios';
+import { Navigate } from "react-router-dom";
+// For GET requests
+axios.interceptors.request.use(
+  (req) => {
+     // Add configurations here
+     return req;
+  },
+  (err) => {
+    console.log(err)
+     return Promise.reject(err);
+  }
+);
+
+// For POST requests
+axios.interceptors.response.use(
+  (res) => {
+     // Add configurations here
+    //  if (res.status === 201) {
+    //  }
+     return res;
+  },
+  (err) => {
+    if (err.response.status === 401) {
+      <Navigate to="order-uploader/login" />
+    }
+
+     return Promise.reject(err);
+  }
+);
 class App extends Component {
   constructor(props) {
     super(props);
@@ -69,6 +100,8 @@ class App extends Component {
       currentUser: undefined,
     });
   }
+
+
 
   render() {
     const { currentUser, showModeratorBoard, showAdminBoard } = this.state;
