@@ -79,7 +79,7 @@ const OrderSideBar = () => {
               <FormControlLabel
                 value="jrau"
                 control={<Radio />}
-                label="Jaycar AU (jrau)"
+                label="Jaycar AU (jrau)" 
               />
               <FormControlLabel
                 value="jrnz"

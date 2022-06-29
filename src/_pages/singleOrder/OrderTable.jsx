@@ -227,7 +227,7 @@ const OrderTable = ({dispatch}) => {
             <Alert sx={{width: "100%"}}severity="success" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.success?.toString()}</ul>`
+                  __html: `<ul style="text-align: left;">${message?.success?.join(" ")}</ul>`
                 }}
               />
             </Alert>
@@ -236,7 +236,7 @@ const OrderTable = ({dispatch}) => {
             <Alert sx={{width: "100%"}}severity="info" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.suggestion?.toString()}</ul>`
+                  __html: `<ul style="text-align: left;">${message?.suggestion?.join(" ")}</ul>`
                 }}
               />
             </Alert>
@@ -292,7 +292,7 @@ const OrderTable = ({dispatch}) => {
             <Alert sx={{width: "100%"}}severity="warning" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.warning?.toString()}</ul>`
+                  __html: `<ul style="text-align: left;">${message?.warning?.join(" ")}</ul>`
                 }}
               />
             </Alert>
@@ -301,7 +301,7 @@ const OrderTable = ({dispatch}) => {
             <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.error?.toString()}</ul>`
+                  __html: `<ul style="text-align: left;">${message?.error?.join(" ")}</ul>`
                 }}
               />
             </Alert>
