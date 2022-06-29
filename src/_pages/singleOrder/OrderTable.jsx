@@ -228,7 +228,7 @@ const OrderTable = ({dispatch}) => {
       {isLoading && <LinearProgress />} 
         <Item>
         {message && message?.success && (
-            <Alert sx={{width: "100%"}}severity="success" style={{ marginTop: 8,maxHeight: 300}}>
+            <Alert sx={{width: "100%"}}severity="success" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
                   __html: `<ul style="text-align: left;">${message?.success?.toString()}</ul>`
@@ -237,7 +237,7 @@ const OrderTable = ({dispatch}) => {
             </Alert>
           )}
           {message && message?.suggestion && (
-            <Alert sx={{width: "100%"}}severity="info" style={{ marginTop: 8,maxHeight: 300}}>
+            <Alert sx={{width: "100%"}}severity="info" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
                   __html: `<ul style="text-align: left;">${message?.suggestion?.toString()}</ul>`
@@ -293,7 +293,7 @@ const OrderTable = ({dispatch}) => {
             />
           </Box>
           {message && message?.warning && (
-            <Alert sx={{width: "100%"}}severity="warning" style={{ marginTop: 8,maxHeight: 300}}>
+            <Alert sx={{width: "100%"}}severity="warning" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
                   __html: `<ul style="text-align: left;">${message?.warning?.toString()}</ul>`
@@ -302,7 +302,7 @@ const OrderTable = ({dispatch}) => {
             </Alert>
           )}
           {message && message?.error && (
-            <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300}}>
+            <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
                   __html: `<ul style="text-align: left;">${message?.error?.toString()}</ul>`
