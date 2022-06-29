@@ -78,7 +78,9 @@ const DashboardProvider = (props) => {
     let qString;
     let obj = {
     };
-
+    if(params?.page) {
+      obj.page =params.page
+    }
     if(params?.search_text)
     {
       obj.search_kw =params.search_text
