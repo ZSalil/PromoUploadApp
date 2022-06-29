@@ -191,6 +191,24 @@ const OrderTable = ({ dispatch }) => {
       <Grid item xs={8}>
      {isLoading && <LinearProgress />} 
         <Item>
+        {message && message?.success && (
+            <Alert sx={{width: "100%"}}severity="success" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `<ul style="text-align: left;">${message?.success?.toString()}</ul>`
+                }}
+              />
+            </Alert>
+          )}
+          {message && message?.suggestion && (
+            <Alert sx={{width: "100%"}}severity="info" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `<ul style="text-align: left;">${message?.suggestion?.toString()}</ul>`
+                }}
+              />
+            </Alert>
+          )}
           <Box
             sx={{
               height: "80vh",
@@ -243,11 +261,20 @@ const OrderTable = ({ dispatch }) => {
               }}
             />
           </Box>
-          {message && (
-            <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300}}>
+          {message && message?.warning && (
+            <Alert sx={{width: "100%"}}severity="warning" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message}</ul>`
+                  __html: `<ul style="text-align: left;">${message?.warning?.toString()}</ul>`
+                }}
+              />
+            </Alert>
+          )}
+          {message && message?.error && (
+            <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `<ul style="text-align: left;">${message?.error?.toString()}</ul>`
                 }}
               />
             </Alert>

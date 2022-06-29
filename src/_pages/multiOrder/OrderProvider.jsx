@@ -7,6 +7,7 @@ import { setMessage } from "../../_actions/message";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
 import { difference, keyBy, merge, slice, sum, uniq, uniqBy, values } from "lodash";
+import Swal from "sweetalert2";
 
 const defaultColumn = [    {
   field: "product_number",
@@ -83,6 +84,21 @@ const OrderProvider = (props) => {
     dispatch({ type: "form-value", name, fieldValue: value });
   };
 
+  function sortByError(a, b) {
+
+
+    if(parseInt(a.total) < parseInt(a.free_stock))
+    {
+      return 1
+    }
+    if(parseInt(a.total) > parseInt(a.free_stock))
+    {
+      return -1
+    }
+    
+    return 0;
+  }
+
   const processMultiCustomerOrder = (props) => {
     setIsLoading(true);
     setMessage(null);
@@ -92,20 +108,24 @@ const OrderProvider = (props) => {
         keyBy(data?.productStock, "product"),
         keyBy(items, "product_number")
       );
+      console.log(newArray);
       const _newArray = values(newArray);
+      _newArray.sort(sortByError)
       setItems(_newArray);
       setFinalList(_newArray);
       setMessage(data?.message)
       setIsLoading(false);
-      if(!data?.orderArray)
-      {
-        toast.error('Something Wrong With the Data')
-      }
-      else
+      if(data?.isReadyForUpload)
       {
         setIsSubmittable(true);
       }
+      else
+      {
+        setIsSubmittable(false);
+        toast.error('Something Wrong With the Data')
+      }
     }).catch(_ => {
+      setIsSubmittable(false);
       setDataProcessed(false);
       setIsLoading(false);
     });
@@ -215,18 +235,44 @@ const OrderProvider = (props) => {
         raw_data: selectedValues?.rawValue?.value,
         source: selectedValues?.source?.value,
       };
-      setIsLoading(true);
-      setMessage(null);
-     await OrderService.saveMultiCustomerOrder(object).then(({ data }) => {
-        setMessage(data?.message)
-        setIsLoading(false);
-      }).catch(_ => {
-        setIsLoading(false);
-      });
-      toast.success("Submit Successfully");
+      if (message?.warning) {
+        Swal.fire({
+          title: "Are you sure?",
+          text: "Some Products maybe out of stock, still want to proceed with the order ?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, Order it!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            orderConfirm(object);
+          }
+        });
+      } else {
+        orderConfirm(object);
+      }
     } else {
       toast.error("Please Fix or remove the red rows");
     }
+  };
+
+
+  const orderConfirm = (params) => {
+    setMessage(null);
+    setIsLoading(true);
+    OrderService.saveMultiCustomerOrder(params)
+      .then(({ data }) => {
+        setIsLoading(false);
+        if (data?.orderConfirmed) {
+          toast.success("Successfully Order Complete");
+        }
+        setMessage(data?.message);
+      })
+      .catch((_) => {
+        toast.error("Something Wrong");
+        setIsLoading(false);
+      });
   };
 
   const handleProcess = () => {

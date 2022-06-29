@@ -108,7 +108,7 @@ const OrderProvider = (props) => {
           keyBy(finalList, "part_number")
         );
         const _newArray = values(newArray);
-        const _sortedArray = _newArray.sort(sortByError)
+        _newArray.sort(sortByError)
         setItems(_newArray);
         setFinalList(_newArray);
         setIsLoading(false);
@@ -189,10 +189,10 @@ const OrderProvider = (props) => {
       ].concat(arr), //process the data as like raw data
     };
 
-    if (message) {
+    if (message?.warning) {
       Swal.fire({
         title: "Are you sure?",
-        text: "Some Product is out of stock, still want to proceed with the order ?",
+        text: "Some Products maybe out of stock, still want to proceed with the order ?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
