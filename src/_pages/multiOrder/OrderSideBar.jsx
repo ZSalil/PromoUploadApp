@@ -79,22 +79,22 @@ const OrderSideBar = () => {
               <FormControlLabel
                 value="jrau"
                 control={<Radio />}
-                label="Jaycar AU"
+                label="Jaycar AU (jrau)"
               />
               <FormControlLabel
                 value="jrnz"
                 control={<Radio />}
-                label=" Jaycar NZ"
+                label=" Jaycar NZ (jrnz)"
               />
               <FormControlLabel
                 value="nzau"
                 control={<Radio />}
-                label="Jaycar NZ (supply from Australia)"
+                label="Jaycar NZ (supply from Australia) (nzau)"
               />
               <FormControlLabel
                 value="rtau"
                 control={<Radio />}
-                label="RTM AU"
+                label="RTM AU (rtau)"
               />
             </RadioGroup>
           </FormControl>
@@ -122,19 +122,9 @@ const OrderSideBar = () => {
               onChange={handleChange}
             >
               <FormControlLabel
-                value="edau"
-                control={<Radio />}
-                label="Electus Au (edau)"
-              />
-              <FormControlLabel
-                value="tbnz"
-                control={<Radio />}
-                label="Electus NZ (tbnz)"
-              />
-              <FormControlLabel
                 value="sdau"
                 control={<Radio />}
-                label="Electus Wholesale Au (edau)"
+                label="Electus Wholesale Au (sdau)"
               />
               <FormControlLabel
                 value="sdnz"
