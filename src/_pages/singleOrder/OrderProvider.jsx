@@ -66,12 +66,36 @@ const OrderProvider = (props) => {
       "part_number"
     );
   }
-
+  const handleHoldPickChange = (event) => {
+    const {  name } = event.target;
+    if(event.target.checked) {
+      dispatch({ type: "form-value", name, fieldValue:'Y' });
+    }
+    else {
+      dispatch({ type: "form-value", name, fieldValue:'N' });
+    }
+   
+  };
   const handleFormValueUpdate = (event) => {
     setDataProcessed(true);
     const { name, value } = event;
     dispatch({ type: "form-value", name, fieldValue: value });
   };
+
+  function sortByError(a, b) {
+
+
+    if(parseInt(a.quantity) < parseInt(a.free_stock))
+    {
+      return 1
+    }
+    if(parseInt(a.quantity) > parseInt(a.free_stock))
+    {
+      return -1
+    }
+    
+    return 0;
+  }
 
   const processSingleOrder = (props) => {
     setMessage(null);
@@ -84,6 +108,7 @@ const OrderProvider = (props) => {
           keyBy(finalList, "part_number")
         );
         const _newArray = values(newArray);
+        const _sortedArray = _newArray.sort(sortByError)
         setItems(_newArray);
         setFinalList(_newArray);
         setIsLoading(false);
@@ -155,6 +180,7 @@ const OrderProvider = (props) => {
       products: finalList,
       po_number: selectedValues?.po_number?.value,
       source: selectedValues?.source?.value,
+      holdPick: selectedValues?.holdPick?.value,
       raw_data: [
         [
           selectedValues?.po_number?.value,
@@ -237,6 +263,7 @@ const OrderProvider = (props) => {
         onSubmit,
         handleProcess,
         finalList,
+        handleHoldPickChange,
         setFinalList,
       }}
     >

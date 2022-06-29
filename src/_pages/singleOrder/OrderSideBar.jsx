@@ -14,6 +14,8 @@ import AutoFixHighTwoToneIcon from "@mui/icons-material/AutoFixHighTwoTone";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
+import FormGroup from '@mui/material/FormGroup';
+import Switch from '@mui/material/Switch';
 const OrderSideBar = () => {
   const {
     selectedValues,
@@ -22,12 +24,15 @@ const OrderSideBar = () => {
     isLoading,
     handleProcess,
     dataProcessed,
-    isSubmittable,
+    isSubmittable,handleHoldPickChange
   } = React.useContext(OrderContext);
   const [orderType, setOrderType] = React.useState('retail');
   const handleOrderTypeChange = (event) => {
     setOrderType(event.target.value);
   };
+
+
+
   return (
     <>
       <Stack spacing={2}>
@@ -66,6 +71,9 @@ const OrderSideBar = () => {
           label="Customer Account"
           variant="standard"
         />
+        <FormGroup>
+  <FormControlLabel onChange={handleHoldPickChange} name="holdPick" control={<Switch defaultChecked />} label="Hold Pick" />
+</FormGroup>
        {orderType === 'retail' ? <FormControl>
           <FormLabel
             id="demo-controlled-radio-buttons-group"

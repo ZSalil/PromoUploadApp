@@ -236,6 +236,15 @@ const OrderTable = ({dispatch}) => {
               />
             </Alert>
           )}
+          {message && message?.suggestion && (
+            <Alert sx={{width: "100%"}}severity="info" style={{ marginTop: 8,maxHeight: 300}}>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `<ul style="text-align: left;">${message?.suggestion?.toString()}</ul>`
+                }}
+              />
+            </Alert>
+          )}
           <Box
             sx={{
               height:"80vh",
@@ -248,8 +257,8 @@ const OrderTable = ({dispatch}) => {
               },
               '& .row-error': {
                 bgcolor: '#ff171796',
-                '&:hover': {
-                  bgcolor: '#ff1717bd'
+                "&:hover": {
+                  bgcolor: "#ff1717bd !important",
                 },
               },
             }}
@@ -284,10 +293,19 @@ const OrderTable = ({dispatch}) => {
             />
           </Box>
           {message && message?.warning && (
-            <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300}}>
+            <Alert sx={{width: "100%"}}severity="warning" style={{ marginTop: 8,maxHeight: 300}}>
               <div
                 dangerouslySetInnerHTML={{
                   __html: `<ul style="text-align: left;">${message?.warning?.toString()}</ul>`
+                }}
+              />
+            </Alert>
+          )}
+          {message && message?.error && (
+            <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300}}>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `<ul style="text-align: left;">${message?.error?.toString()}</ul>`
                 }}
               />
             </Alert>
