@@ -147,7 +147,6 @@ const OrderTable = ({dispatch}) => {
       type: "number",
       align: "center",
       headerAlign: "center",
-      editable: true,
       flex: 1,
     },
     {
@@ -155,7 +154,6 @@ const OrderTable = ({dispatch}) => {
       headerName: "Unit",
       align: "center",
       headerAlign: "center",
-      editable: true,
       flex: 1,
     },
     {
@@ -163,7 +161,6 @@ const OrderTable = ({dispatch}) => {
       headerName: "Location",
       align: "center",
       headerAlign: "center",
-      editable: true,
       flex: 1,
     },
     {
@@ -171,7 +168,6 @@ const OrderTable = ({dispatch}) => {
       headerName: "ADN",
       align: "center",
       headerAlign: "center",
-      editable: true,
       flex: 1,
     },
     {
