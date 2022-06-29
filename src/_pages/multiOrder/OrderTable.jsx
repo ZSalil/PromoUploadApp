@@ -265,7 +265,7 @@ const OrderTable = ({ dispatch }) => {
             <Alert sx={{width: "100%"}}severity="warning" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.warning?.toString(" ")}</ul>`
+                  __html: `<ul style="text-align: left;">${message?.warning?.join(" ")}</ul>`
                 }}
               />
             </Alert>
@@ -274,7 +274,7 @@ const OrderTable = ({ dispatch }) => {
             <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.error?.toString(" ")}</ul>`
+                  __html: `<ul style="text-align: left;">${message?.error?.join(" ")}</ul>`
                 }}
               />
             </Alert>
