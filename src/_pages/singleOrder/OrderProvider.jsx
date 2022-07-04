@@ -46,14 +46,12 @@ const OrderProvider = (props) => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [finalList, setFinalList] = React.useState([]);
-  const [dataProcessed, setDataProcessed] = React.useState(false);
   const [isSubmittable, setIsSubmittable] = React.useState(false);
   const [message, setMessage] = React.useState(null);
   useEffect(() => {}, []);
 
   // Handle form change
   const handleChange = (event) => {
-    setDataProcessed(true);
     const { type, name, value } = event.target;
     const fieldValue = value;
     dispatch({ type: "form-value", name, fieldValue });
@@ -77,7 +75,7 @@ const OrderProvider = (props) => {
    
   };
   const handleFormValueUpdate = (event) => {
-    setDataProcessed(true);
+ 
     const { name, value } = event;
     dispatch({ type: "form-value", name, fieldValue: value });
   };
@@ -97,37 +95,44 @@ const OrderProvider = (props) => {
     return 0;
   }
 
+
   const processSingleOrder = (props) => {
-    setMessage(null);
-    setIsLoading(true);
-    OrderService.processSingleOrder(props)
-      .then(({ data }) => {
-        setDataProcessed(false);
-        const newArray = merge(
-          keyBy(data?.products, "product"),
-          keyBy(finalList, "part_number")
-        );
-        const _newArray = values(newArray);
-        _newArray.sort(sortByError)
-        setItems(_newArray);
-        setFinalList(_newArray);
-        setIsLoading(false);
-        if (data.isReadyForUpload) {
-          setIsSubmittable(true);
-        }
-        else
-        {
-          setIsSubmittable(false);
-        }
-        if (!data?.validate) {
-          toast.error("Data is not Valid, Please Change and resubmit");
-        }
-        setMessage(data?.message);
-      })
-      .catch((_) => {
-        toast.error("Something Wrong");
-        setIsLoading(false);
-      });
+    if(selectedValues?.source?.value)
+    {
+      setMessage(null);
+      setIsLoading(true);
+      OrderService.processSingleOrder(props)
+        .then(({ data }) => {
+          const newArray = merge(
+            keyBy(data?.products, "product"),
+            keyBy(finalList, "part_number")
+          );
+          const _newArray = values(newArray);
+          _newArray.sort(sortByError)
+          setItems(_newArray);
+          setFinalList(_newArray);
+          setIsLoading(false);
+          if (data.isReadyForUpload) {
+            setIsSubmittable(true);
+          }
+          else
+          {
+            setIsSubmittable(false);
+          }
+          if (!data?.validate) {
+            toast.error("Data is not Valid, Please Change and resubmit");
+          }
+          setMessage(data?.message);
+        })
+        .catch((_) => {
+          toast.error("Something Wrong");
+          setIsLoading(false);
+        });
+    }
+    else {
+      toast.error('You must have to select a source before process');
+    }
+
   };
 
   const processCsv = (file) => {
@@ -259,7 +264,6 @@ const OrderProvider = (props) => {
         processCsv,
         selectedValues,
         handleChange,
-        dataProcessed,
         onSubmit,
         handleProcess,
         finalList,

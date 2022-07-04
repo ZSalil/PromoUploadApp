@@ -58,13 +58,11 @@ const OrderProvider = (props) => {
   const [isSubmittable, setIsSubmittable] = React.useState(false);
   const [columns, setColumns] = React.useState([]);
   const [finalList, setFinalList] = React.useState([]);
-  const [dataProcessed, setDataProcessed] = React.useState(false);
 
   useEffect(() => {}, []);
 
   // Handle form change
   const handleChange = (event) => {
-    setDataProcessed(true);
     const { type, name, value } = event.target;
     const fieldValue = value;
     dispatch({ type: "form-value", name, fieldValue });
@@ -79,7 +77,6 @@ const OrderProvider = (props) => {
   }
 
   const handleFormValueUpdate = (event) => {
-    setDataProcessed(true);
     const { name, value } = event;
     dispatch({ type: "form-value", name, fieldValue: value });
   };
@@ -103,7 +100,7 @@ const OrderProvider = (props) => {
     setIsLoading(true);
     setMessage(null);
     OrderService.processMultiCustomerOrder(props).then(({ data }) => {
-      setDataProcessed(false);
+     
       const newArray = merge(
         keyBy(data?.productStock, "product"),
         keyBy(items, "product_number")
@@ -126,7 +123,7 @@ const OrderProvider = (props) => {
       }
     }).catch(_ => {
       setIsSubmittable(false);
-      setDataProcessed(false);
+    
       setIsLoading(false);
     });
   };
@@ -276,11 +273,17 @@ const OrderProvider = (props) => {
   };
 
   const handleProcess = () => {
+    if(selectedValues?.source?.value)
+    {
     let object = {
       raw_data: selectedValues?.rawValue?.value,
       source: selectedValues?.source?.value,
     };
     processMultiCustomerOrder(object);
+  }
+  else {
+    toast.error('You must have to select a source before process');
+  }
   };
 
   return (
@@ -296,7 +299,6 @@ const OrderProvider = (props) => {
         processCsv,
         selectedValues,
         handleChange,
-        dataProcessed,
         onSubmit,
         handleProcess,
         finalList,

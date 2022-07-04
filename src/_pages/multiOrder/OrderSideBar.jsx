@@ -20,7 +20,6 @@ const OrderSideBar = () => {
     onSubmit,
     isLoading,
     handleProcess,
-    dataProcessed,
     isSubmittable,
   } = React.useContext(OrderContext);
   const [orderType, setOrderType] = React.useState("retail");
@@ -137,7 +136,6 @@ const OrderSideBar = () => {
           ""
         )}
         <LoadingButton
-          disabled={!dataProcessed}
           onClick={handleProcess}
           endIcon={<AutoFixHighTwoToneIcon />}
           loading={isLoading}

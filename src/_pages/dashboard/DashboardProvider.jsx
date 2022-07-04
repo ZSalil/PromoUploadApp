@@ -81,9 +81,12 @@ const DashboardProvider = (props) => {
     if(params?.page) {
       obj.page =params.page
     }
-    if(params?.search_text)
+    if(params?.search_text !== 'empty')
     {
-      obj.search_kw =params.search_text
+      obj.search_kw = params?.search_text;
+    }
+    else{
+      obj.search_kw = '';
     }
 
     if (selectedValues?.search_text?.value && params?.search_text !== "empty") {
