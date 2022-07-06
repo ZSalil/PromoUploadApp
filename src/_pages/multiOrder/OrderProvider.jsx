@@ -58,7 +58,7 @@ const OrderProvider = (props) => {
   const [isSubmittable, setIsSubmittable] = React.useState(false);
   const [columns, setColumns] = React.useState([]);
   const [finalList, setFinalList] = React.useState([]);
-
+  const [orderType, setOrderType] = React.useState("retail");
   useEffect(() => {}, []);
 
   // Handle form change
@@ -177,7 +177,7 @@ const OrderProvider = (props) => {
             type: "number",
             align: "center",
             headerAlign: "center",
-            width: 180,
+            width: 100,
             editable: true,
           },{
             field: "free_stock",
@@ -185,13 +185,20 @@ const OrderProvider = (props) => {
             type: "number",
             align: "center",
             headerAlign: "center",
-            width: 180,
+            width: 100,
             editable: true,
+          },
+          {
+            field: "buffered_stock",
+            headerName: "Buff. Stock",
+            align: "center",
+            headerAlign: "center",
+            width: 100,
           },
           {
             field: "uom",
             headerName: "Unit",
-            width: 180,
+            width: 100,
             align: "center",
             headerAlign: "center",
           },
@@ -200,15 +207,29 @@ const OrderProvider = (props) => {
             headerName: "Location",
             align: "center",
             headerAlign: "center",
-            width: 180,
+            width: 100,
           },
           {
             field: "adn",
             headerName: "ADN",
             align: "center",
             headerAlign: "center",
-            width: 180,
-          },]);
+            width: 100,
+          },
+          {
+            field: "mdn_link",
+            headerName: "Mdm Link",
+            align: "center",
+            headerAlign: "center",
+            width: 100,
+            renderCell: (params) => (
+              <strong>
+                <a target="_blank" href={`http://branch.jaycar.com.au/mdm/index.php?itemCode=${params?.row?.product_number}&page=description&catalogueversion=`}>
+                  Mdm Page
+                </a>
+              </strong>
+            ),
+          }]);
           setItems(newProcessedArray);
         }
 
@@ -303,6 +324,7 @@ const OrderProvider = (props) => {
         handleProcess,
         finalList,
         setFinalList,
+        orderType, setOrderType
       }}
     >
       {props.children}

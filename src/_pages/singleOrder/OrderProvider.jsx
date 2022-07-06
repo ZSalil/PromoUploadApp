@@ -48,6 +48,7 @@ const OrderProvider = (props) => {
   const [finalList, setFinalList] = React.useState([]);
   const [isSubmittable, setIsSubmittable] = React.useState(false);
   const [message, setMessage] = React.useState(null);
+  const [orderType, setOrderType] = React.useState("retail");
   useEffect(() => {}, []);
 
   // Handle form change
@@ -65,40 +66,31 @@ const OrderProvider = (props) => {
     );
   }
   const handleHoldPickChange = (event) => {
-    const {  name } = event.target;
-    if(event.target.checked) {
-      dispatch({ type: "form-value", name, fieldValue:'Y' });
+    const { name } = event.target;
+    if (event.target.checked) {
+      dispatch({ type: "form-value", name, fieldValue: "Y" });
+    } else {
+      dispatch({ type: "form-value", name, fieldValue: "N" });
     }
-    else {
-      dispatch({ type: "form-value", name, fieldValue:'N' });
-    }
-   
   };
   const handleFormValueUpdate = (event) => {
- 
     const { name, value } = event;
     dispatch({ type: "form-value", name, fieldValue: value });
   };
 
   function sortByError(a, b) {
-
-
-    if(parseInt(a.quantity) < parseInt(a.free_stock))
-    {
-      return 1
+    if (parseInt(a.quantity) < parseInt(a.free_stock)) {
+      return 1;
     }
-    if(parseInt(a.quantity) > parseInt(a.free_stock))
-    {
-      return -1
+    if (parseInt(a.quantity) > parseInt(a.free_stock)) {
+      return -1;
     }
-    
+
     return 0;
   }
 
-
   const processSingleOrder = (props) => {
-    if(selectedValues?.source?.value)
-    {
+    if (selectedValues?.source?.value) {
       setMessage(null);
       setIsLoading(true);
       OrderService.processSingleOrder(props)
@@ -108,15 +100,13 @@ const OrderProvider = (props) => {
             keyBy(finalList, "part_number")
           );
           const _newArray = values(newArray);
-          _newArray.sort(sortByError)
+          _newArray.sort(sortByError);
           setItems(_newArray);
           setFinalList(_newArray);
           setIsLoading(false);
           if (data.isReadyForUpload) {
             setIsSubmittable(true);
-          }
-          else
-          {
+          } else {
             setIsSubmittable(false);
           }
           if (!data?.validate) {
@@ -128,11 +118,9 @@ const OrderProvider = (props) => {
           toast.error("Something Wrong");
           setIsLoading(false);
         });
+    } else {
+      toast.error("You must have to select a source before process");
     }
-    else {
-      toast.error('You must have to select a source before process');
-    }
-
   };
 
   const processCsv = (file) => {
@@ -269,6 +257,8 @@ const OrderProvider = (props) => {
         finalList,
         handleHoldPickChange,
         setFinalList,
+        orderType,
+        setOrderType,
       }}
     >
       {props.children}

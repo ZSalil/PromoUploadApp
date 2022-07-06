@@ -70,7 +70,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const OrderTable = ({dispatch}) => {
-  const { items, setFinalList,message ,isLoading} = React.useContext(OrderContext);
+  const { items, setFinalList,message ,isLoading,orderType} = React.useContext(OrderContext);
   const [rows, setRows] = React.useState(items);
   const [rowModesModel, setRowModesModel] = React.useState({});
   React.useEffect(() => {
@@ -122,6 +122,15 @@ const OrderTable = ({dispatch}) => {
     return updatedRow;
   };
 
+  const hideColumn= ()=> {
+
+    if(orderType === 'wholesale')
+    {
+      return false;
+    }
+    return true;
+  }
+
   const columns = [
     {
       field: "part_number",
@@ -150,6 +159,14 @@ const OrderTable = ({dispatch}) => {
       flex: 1,
     },
     {
+      field: "buffered_stock",
+      headerName: "Buff. Stock",
+      align: "center",
+      headerAlign: "center",
+      hide: hideColumn(),
+      flex: 1,
+    },
+    {
       field: "uom",
       headerName: "Unit",
       align: "center",
@@ -169,6 +186,20 @@ const OrderTable = ({dispatch}) => {
       align: "center",
       headerAlign: "center",
       flex: 1,
+    },
+    {
+      field: "mdn_link",
+      headerName: "Mdm Link",
+      align: "center",
+      headerAlign: "center",
+      width: 100,
+      renderCell: (params) => (
+        <strong>
+          <a target="_blank" href={`http://branch.jaycar.com.au/mdm/index.php?itemCode=${params?.row?.part_number}&page=description&catalogueversion=`}>
+            Mdm Page
+          </a>
+        </strong>
+      ),
     },
     {
       field: "actions",

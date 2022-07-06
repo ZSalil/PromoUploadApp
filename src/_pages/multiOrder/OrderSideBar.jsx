@@ -21,8 +21,8 @@ const OrderSideBar = () => {
     isLoading,
     handleProcess,
     isSubmittable,
+    orderType, setOrderType
   } = React.useContext(OrderContext);
-  const [orderType, setOrderType] = React.useState("retail");
   const handleOrderTypeChange = (event) => {
     setOrderType(event.target.value);
   };

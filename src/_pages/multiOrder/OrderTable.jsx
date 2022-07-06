@@ -19,7 +19,6 @@ import { connect } from "react-redux";
 import { CustomFooter } from "./CustomFooter";
 import LinearProgress from '@mui/material/LinearProgress';
 function EditToolbar(props) {
-  const { setRows, setRowModesModel } = props;
 
 
 

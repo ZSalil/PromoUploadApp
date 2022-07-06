@@ -4,11 +4,7 @@ import Paper from "@mui/material/Paper";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
-import {
-  DataGrid,
-  GridToolbarContainer,
-  GridToolbar,
-} from "@mui/x-data-grid";
+import { DataGrid, GridToolbarContainer, GridToolbar } from "@mui/x-data-grid";
 import { DashboardContext } from "./DashboardProvider";
 import { connect } from "react-redux";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -17,7 +13,7 @@ import Input from "@mui/material/Input";
 import SearchIcon from "@mui/icons-material/Search";
 import Pagination from "@mui/material/Pagination";
 import PaginationItem from "@mui/material/PaginationItem";
-
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import IconButton from "@mui/material/IconButton";
 import PreviewIcon from "@mui/icons-material/Preview";
 import OrderItemTable from "./OrderItemTable";
@@ -54,9 +50,7 @@ function CustomPagination() {
 }
 
 function Toolbar(props) {
-
   const { handleSearch } = React.useContext(DashboardContext);
-
 
   return (
     <GridToolbarContainer className="justify-content-between">
@@ -92,17 +86,17 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const DashboardDashboardTable = ({ dispatch }) => {
-  const { items, isLoading,setOpen, paginateItems,updateOrderItemTable } =
+  const { items, isLoading, setOpen, paginateItems, updateOrderItemTable } =
     React.useContext(DashboardContext);
   const [rowModesModel, setRowModesModel] = React.useState({});
 
   const handleOpen = (id) => {
-    setOpen(true)
-    updateOrderItemTable({vii_reference:id});
+    setOpen(true);
+    updateOrderItemTable({ vii_reference: id });
   };
   const columns = [
     {
-      field: "vih_reference",
+      field: "vii_reference",
       headerName: "Reference ID",
       align: "center",
       headerAlign: "center",
@@ -110,7 +104,7 @@ const DashboardDashboardTable = ({ dispatch }) => {
       flex: 1,
     },
     {
-      field: "vih_idate",
+      field: "order_import_date",
       headerName: "Date",
       type: "number",
       align: "center",
@@ -118,7 +112,7 @@ const DashboardDashboardTable = ({ dispatch }) => {
       flex: 1,
     },
     {
-      field: "vih_company",
+      field: "upload_company",
       headerName: "Company",
       type: "number",
       align: "center",
@@ -126,43 +120,45 @@ const DashboardDashboardTable = ({ dispatch }) => {
       flex: 1,
     },
     {
-      field: "vih_customer",
+      field: "customer",
       headerName: "Customer",
       align: "center",
       headerAlign: "center",
       flex: 1,
     },
     {
-      field: "vih_cusref",
+      field: "customer_ref",
       headerName: "Customer Ref",
       align: "center",
       headerAlign: "center",
       flex: 1,
     },
     {
-      field: "vih_source",
+      field: "created_by",
       headerName: "Source",
       align: "center",
       headerAlign: "center",
       flex: 1,
     },
+
     {
-      field: "vih_status",
-      headerName: "Status",
+      field: "lines",
+      headerName: "Lines",
       align: "center",
       headerAlign: "center",
       flex: 1,
     },
+
     {
       field: "vih_order",
       headerName: "No. Order Lines",
-      flex: 1,
+
       renderCell: (params) => (
         <div>
-          {params?.row?.order_count}{" "}
+          {params?.row?.items}{" "}
           <IconButton
             color="primary"
-            onClick={()=>handleOpen(params?.row?.vih_reference)}
+            onClick={() => handleOpen(params?.row?.vii_reference)}
             component="span"
           >
             <PreviewIcon />
@@ -170,10 +166,22 @@ const DashboardDashboardTable = ({ dispatch }) => {
         </div>
       ),
     },
+    {
+      field: "status",
+      headerName: "Status",
+      align: "center",
+      headerAlign: "center",
+      flex: 1,
+      renderCell: (params) => (
+        <p>{params?.row?.status} {params?.row?.status.includes('Complete') ? <CheckCircleIcon color="success"/> : ''} 
+        </p>
+      ),
+      width:200
+    },
   ];
   return (
     <div>
-      <OrderItemTable/>
+      <OrderItemTable />
       {isLoading && <LinearProgress />}
       <Item>
         <Box
