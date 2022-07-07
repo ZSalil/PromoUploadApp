@@ -100,16 +100,16 @@ const DashboardDashboardTable = ({ dispatch }) => {
       headerName: "Reference ID",
       align: "center",
       headerAlign: "center",
-      width: 180,
-      flex: 1,
+      width: 100,
+      
     },
     {
       field: "oneoffice_order",
       headerName: "OneOffice No.",
       align: "center",
       headerAlign: "center",
-      width: 180,
-      flex: 1,
+      width: 100,
+      
     },
     {
       field: "order_import_date",
@@ -117,7 +117,8 @@ const DashboardDashboardTable = ({ dispatch }) => {
       type: "number",
       align: "center",
       headerAlign: "center",
-      flex: 1,
+      width: 180,
+      
     },
     {
       field: "upload_company",
@@ -125,28 +126,28 @@ const DashboardDashboardTable = ({ dispatch }) => {
       type: "number",
       align: "center",
       headerAlign: "center",
-      flex: 1,
+      
     },
     {
       field: "customer",
       headerName: "Customer",
       align: "center",
       headerAlign: "center",
-      flex: 1,
+      
     },
     {
       field: "customer_ref",
       headerName: "Customer Ref",
       align: "center",
       headerAlign: "center",
-      flex: 1,
+      
     },
     {
       field: "created_by",
       headerName: "Source",
       align: "center",
       headerAlign: "center",
-      flex: 1,
+      width: 140,
     },
 
     {
@@ -154,7 +155,7 @@ const DashboardDashboardTable = ({ dispatch }) => {
       headerName: "Lines",
       align: "center",
       headerAlign: "center",
-      flex: 1,
+      
     },
 
     {
