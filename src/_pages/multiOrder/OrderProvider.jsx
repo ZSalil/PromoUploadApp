@@ -6,17 +6,28 @@ import { connect } from "react-redux";
 import { setMessage } from "../../_actions/message";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
-import { difference, keyBy, merge, slice, sum, uniq, uniqBy, values } from "lodash";
+import {
+  difference,
+  keyBy,
+  merge,
+  slice,
+  sum,
+  uniq,
+  uniqBy,
+  values,
+} from "lodash";
 import Swal from "sweetalert2";
 
-const defaultColumn = [    {
-  field: "product_number",
-  headerName: "Product Number",
-  align: "center",
-  headerAlign: "center",
-  width: 180,
-  editable: true,
-},]
+const defaultColumn = [
+  {
+    field: "product_number",
+    headerName: "Product Number",
+    align: "center",
+    headerAlign: "center",
+    width: 180,
+    editable: true,
+  },
+];
 
 export const OrderContext = React.createContext({
   selectedValues: {},
@@ -71,8 +82,8 @@ const OrderProvider = (props) => {
   function isProductUnique() {
     return difference(
       finalList,
-      uniqBy(finalList, "part_number"),
-      "part_number"
+      uniqBy(finalList, "product_number"),
+      "product_number"
     );
   }
 
@@ -82,84 +93,79 @@ const OrderProvider = (props) => {
   };
 
   function sortByError(a, b) {
-
-
-    if(parseInt(a.total) < parseInt(a.free_stock))
-    {
-      return 1
+    if (parseInt(a.total) < parseInt(a.free_stock)) {
+      return 1;
     }
-    if(parseInt(a.total) > parseInt(a.free_stock))
-    {
-      return -1
+    if (parseInt(a.total) > parseInt(a.free_stock)) {
+      return -1;
     }
-    
+
     return 0;
   }
 
   const processMultiCustomerOrder = (props) => {
     setIsLoading(true);
     setMessage(null);
-    OrderService.processMultiCustomerOrder(props).then(({ data }) => {
-     
-      const newArray = merge(
-        keyBy(data?.productStock, "product"),
-        keyBy(items, "product_number")
-      );
-      console.log(newArray);
-      const _newArray = values(newArray);
-      _newArray.sort(sortByError)
-      setItems(_newArray);
-      setFinalList(_newArray);
-      setMessage(data?.message)
-      setIsLoading(false);
-      if(data?.isReadyForUpload)
-      {
-        setIsSubmittable(true);
-      }
-      else
-      {
+    OrderService.processMultiCustomerOrder(props)
+      .then(({ data }) => {
+        const newArray = merge(
+          keyBy(data?.productStock, "product"),
+          keyBy(items, "product_number")
+        );
+        console.log(newArray);
+        const _newArray = values(newArray);
+        _newArray.sort(sortByError);
+        setItems(_newArray);
+        setFinalList(_newArray);
+        setMessage(data?.message);
+        setIsLoading(false);
+        if (data?.isReadyForUpload) {
+          setIsSubmittable(true);
+        } else {
+          setIsSubmittable(false);
+          toast.error("Something Wrong With the Data");
+        }
+      })
+      .catch((_) => {
         setIsSubmittable(false);
-        toast.error('Something Wrong With the Data')
-      }
-    }).catch(_ => {
-      setIsSubmittable(false);
-    
-      setIsLoading(false);
-    });
+
+        setIsLoading(false);
+      });
   };
 
   const processCsv = (file) => {
     setMessage(null);
-    setItems([])
+    setItems([]);
     Papa.parse(file, {
       header: false,
-      skipEmptyLines:true,
+      skipEmptyLines: true,
       complete: function ({ data, meta: { fields } }) {
         if (data?.length > 1) {
-          const name = 'rawValue';
-          console.log(data)
-          dispatch({ type: "form-value", name, fieldValue:data });
+          const name = "rawValue";
+          console.log(data);
+          dispatch({ type: "form-value", name, fieldValue: data });
         }
-
       },
     });
     let newColumn = [];
     Papa.parse(file, {
       header: true,
       dynamicTyping: true,
-      skipEmptyLines:true,
+      skipEmptyLines: true,
       complete: function ({ data, meta: { fields } }) {
         if (data?.length > 0) {
-          let newProcessedArray = data.map((obj, index) =>{
+          let newProcessedArray = data.map((obj, index) => {
             let qtyObj = Object.assign({}, obj);
             delete qtyObj[Object.keys(qtyObj)[Object.keys(qtyObj).length - 1]];
 
-            return({
-            product_number: obj[Object.keys(obj)[Object.keys(obj).length - 1]],
-            id: index,
-            total:sum(Object.values(qtyObj)),
-            ...obj,
-          })});
+            return {
+              product_number:
+                obj[Object.keys(obj)[Object.keys(obj).length - 1]],
+              id: index,
+              total: sum(Object.values(qtyObj)),
+              ...obj,
+            };
+          });
           fields.slice(1).forEach(function (value) {
             newColumn.push({
               field: value,
@@ -171,68 +177,75 @@ const OrderProvider = (props) => {
               flex: 1,
             });
           });
-          setColumns([...defaultColumn, ...newColumn,{
-            field: "total",
-            headerName: "Total Order",
-            type: "number",
-            align: "center",
-            headerAlign: "center",
-            width: 100,
-            editable: true,
-          },{
-            field: "free_stock",
-            headerName: "Available Stock",
-            type: "number",
-            align: "center",
-            headerAlign: "center",
-            width: 100,
-            editable: true,
-          },
-          {
-            field: "buffered_stock",
-            headerName: "Buff. Stock",
-            align: "center",
-            headerAlign: "center",
-            width: 100,
-          },
-          {
-            field: "uom",
-            headerName: "Unit",
-            width: 100,
-            align: "center",
-            headerAlign: "center",
-          },
-          {
-            field: "location",
-            headerName: "Location",
-            align: "center",
-            headerAlign: "center",
-            width: 100,
-          },
-          {
-            field: "adn",
-            headerName: "ADN",
-            align: "center",
-            headerAlign: "center",
-            width: 100,
-          },
-          {
-            field: "mdn_link",
-            headerName: "Mdm Link",
-            align: "center",
-            headerAlign: "center",
-            width: 100,
-            renderCell: (params) => (
-              <strong>
-                <a target="_blank" href={`http://branch.jaycar.com.au/mdm/index.php?itemCode=${params?.row?.product_number}&page=description&catalogueversion=`}>
-                  Mdm Page
-                </a>
-              </strong>
-            ),
-          }]);
+          setColumns([
+            ...defaultColumn,
+            ...newColumn,
+            {
+              field: "total",
+              headerName: "Total Order",
+              type: "number",
+              align: "center",
+              headerAlign: "center",
+              width: 100,
+              editable: true,
+            },
+            {
+              field: "free_stock",
+              headerName: "Available Stock",
+              type: "number",
+              align: "center",
+              headerAlign: "center",
+              width: 100,
+              editable: true,
+            },
+            {
+              field: "buffered_stock",
+              headerName: "Buff. Stock",
+              align: "center",
+              headerAlign: "center",
+              width: 100,
+            },
+            {
+              field: "uom",
+              headerName: "Unit",
+              width: 100,
+              align: "center",
+              headerAlign: "center",
+            },
+            {
+              field: "location",
+              headerName: "Location",
+              align: "center",
+              headerAlign: "center",
+              width: 100,
+            },
+            {
+              field: "adn",
+              headerName: "ADN",
+              align: "center",
+              headerAlign: "center",
+              width: 100,
+            },
+            {
+              field: "mdn_link",
+              headerName: "Mdm Link",
+              align: "center",
+              headerAlign: "center",
+              width: 100,
+              renderCell: (params) => (
+                <strong>
+                  <a
+                    target="_blank"
+                    href={`http://branch.jaycar.com.au/mdm/index.php?itemCode=${params?.row?.product_number}&page=description&catalogueversion=`}
+                  >
+                    Mdm Page
+                  </a>
+                </strong>
+              ),
+            },
+          ]);
           setItems(newProcessedArray);
         }
-
       },
     });
   };
@@ -244,6 +257,24 @@ const OrderProvider = (props) => {
         "Duplicate Product Ids : " +
           duplicate.map((obj) => obj.part_number).toString(",")
       );
+    } else if (
+      orderType === "wholesale" &&
+      finalList?.some(
+        (obj) => parseInt(obj?.buffered_stock) < parseInt(obj?.total)
+      )
+    ) {
+      toast.error(
+        "Product order quantity cannot be less than Bufferstock for wholesale order"
+      );
+      let errorMessage = [];
+      for(const item of finalList) {
+        if(parseInt(item?.buffered_stock) < parseInt(item?.total))
+        {
+          errorMessage.push(`<li>Product:${item?.product} order total: ${item?.total} is more than Buffer stock: ${item?.buffered_stock} </li>`)
+        }
+      }
+      setMessage({error:errorMessage})
+      setIsSubmittable(false);
     } else if (
       !finalList?.filter(
         (obj) => parseInt(obj?.quantity) > parseInt(obj?.free_stock)
@@ -275,36 +306,33 @@ const OrderProvider = (props) => {
     }
   };
 
-
   const orderConfirm = (params) => {
     setMessage(null);
-    setIsLoading(true);
-    OrderService.saveMultiCustomerOrder(params)
-      .then(({ data }) => {
-        setIsLoading(false);
-        if (data?.orderConfirmed) {
-          toast.success("Successfully Order Complete");
-        }
-        setMessage(data?.message);
-      })
-      .catch((_) => {
-        toast.error("Something Wrong");
-        setIsLoading(false);
-      });
+    // setIsLoading(true);
+    // OrderService.saveMultiCustomerOrder(params)
+    //   .then(({ data }) => {
+    //     setIsLoading(false);
+    //     if (data?.orderConfirmed) {
+    //       toast.success("Successfully Order Complete");
+    //     }
+    //     setMessage(data?.message);
+    //   })
+    //   .catch((_) => {
+    //     toast.error("Something Wrong");
+    //     setIsLoading(false);
+    //   });
   };
 
   const handleProcess = () => {
-    if(selectedValues?.source?.value)
-    {
-    let object = {
-      raw_data: selectedValues?.rawValue?.value,
-      source: selectedValues?.source?.value,
-    };
-    processMultiCustomerOrder(object);
-  }
-  else {
-    toast.error('You must have to select a source before process');
-  }
+    if (selectedValues?.source?.value) {
+      let object = {
+        raw_data: selectedValues?.rawValue?.value,
+        source: selectedValues?.source?.value,
+      };
+      processMultiCustomerOrder(object);
+    } else {
+      toast.error("You must have to select a source before process");
+    }
   };
 
   return (
@@ -312,7 +340,8 @@ const OrderProvider = (props) => {
       value={{
         columns,
         isSubmittable,
-        message, setMessage,
+        message,
+        setMessage,
         setColumns,
         handleFormValueUpdate,
         items,
@@ -324,7 +353,8 @@ const OrderProvider = (props) => {
         handleProcess,
         finalList,
         setFinalList,
-        orderType, setOrderType
+        orderType,
+        setOrderType,
       }}
     >
       {props.children}

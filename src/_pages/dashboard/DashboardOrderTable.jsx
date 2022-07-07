@@ -104,6 +104,14 @@ const DashboardDashboardTable = ({ dispatch }) => {
       flex: 1,
     },
     {
+      field: "oneoffice_order",
+      headerName: "OneOffice No.",
+      align: "center",
+      headerAlign: "center",
+      width: 180,
+      flex: 1,
+    },
+    {
       field: "order_import_date",
       headerName: "Date",
       type: "number",
