@@ -160,7 +160,7 @@ const OrderProvider = (props) => {
 
             return {
               product_number:
-                obj[Object.keys(obj)[Object.keys(obj).length - 1]],
+                obj[Object.keys(obj)[Object.keys(obj).length - 1]]?.toUpperCase(),
               id: index,
               total: sum(Object.values(qtyObj)),
               ...obj,

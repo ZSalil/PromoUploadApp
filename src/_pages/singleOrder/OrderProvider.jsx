@@ -132,7 +132,7 @@ const OrderProvider = (props) => {
           let newArray = slice(data, 1, data.length);
           const newProcessedArray = newArray.map((obj, index) => ({
             id: index,
-            part_number: obj[0],
+            part_number: obj[0]?.toUpperCase(),
             quantity: obj[1],
           }));
           setItems(newProcessedArray);
