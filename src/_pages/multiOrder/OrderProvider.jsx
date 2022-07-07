@@ -260,7 +260,7 @@ const OrderProvider = (props) => {
     } else if (
       orderType === "wholesale" &&
       finalList?.some(
-        (obj) => parseInt(obj?.buffered_stock) < parseInt(obj?.total)
+        (obj) =>  parseInt(obj?.buffered_stock) !== 0 && ( parseInt(obj?.buffered_stock) < parseInt(obj?.total))
       )
     ) {
       toast.error(
@@ -268,7 +268,7 @@ const OrderProvider = (props) => {
       );
       let errorMessage = [];
       for(const item of finalList) {
-        if(parseInt(item?.buffered_stock) < parseInt(item?.total))
+        if(parseInt(item?.buffered_stock) !== 0 && (parseInt(item?.buffered_stock) < parseInt(item?.total)))
         {
           errorMessage.push(`<li>Product:${item?.product} order total: ${item?.total} is more than Buffer stock: ${item?.buffered_stock} </li>`)
         }
@@ -308,19 +308,19 @@ const OrderProvider = (props) => {
 
   const orderConfirm = (params) => {
     setMessage(null);
-    // setIsLoading(true);
-    // OrderService.saveMultiCustomerOrder(params)
-    //   .then(({ data }) => {
-    //     setIsLoading(false);
-    //     if (data?.orderConfirmed) {
-    //       toast.success("Successfully Order Complete");
-    //     }
-    //     setMessage(data?.message);
-    //   })
-    //   .catch((_) => {
-    //     toast.error("Something Wrong");
-    //     setIsLoading(false);
-    //   });
+    setIsLoading(true);
+    OrderService.saveMultiCustomerOrder(params)
+      .then(({ data }) => {
+        setIsLoading(false);
+        if (data?.orderConfirmed) {
+          toast.success("Successfully Order Complete");
+        }
+        setMessage(data?.message);
+      })
+      .catch((_) => {
+        toast.error("Something Wrong");
+        setIsLoading(false);
+      });
   };
 
   const handleProcess = () => {

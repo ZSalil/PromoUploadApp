@@ -146,7 +146,7 @@ const OrderSideBar = () => {
         </LoadingButton>
         <Button
           variant="contained"
-          // disabled={!isSubmittable}
+          disabled={!isSubmittable}
           onClick={onSubmit}
         >
           Submit

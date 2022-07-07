@@ -181,11 +181,11 @@ const OrderProvider = (props) => {
         ],
       ].concat(arr), //process the data as like raw data
     };
-    if(orderType === 'wholesale' && finalList?.some(obj => parseInt(obj?.buffered_stock) < parseInt(obj?.quantity))){
+    if(orderType === 'wholesale' && finalList?.some(obj => parseInt(obj?.buffered_stock) !== 0 && (parseInt(obj?.buffered_stock) < parseInt(obj?.quantity)))){
       toast.error('Product order quantity cannot be less than Bufferstock for wholesale order');
       let errorMessage = [];
       for(const item of finalList) {
-        if(parseInt(item?.buffered_stock) < parseInt(item?.quantity))
+        if(parseInt(item?.buffered_stock) !== 0 && ( parseInt(item?.buffered_stock) < parseInt(item?.quantity)))
         {
           errorMessage.push(`<li>Product:${item?.product} order quantity: ${item?.quantity} is more than Buffer stock: ${item?.buffered_stock} </li>`)
         }
