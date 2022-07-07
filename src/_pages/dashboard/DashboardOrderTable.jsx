@@ -179,7 +179,6 @@ const DashboardDashboardTable = ({ dispatch }) => {
       headerName: "Status",
       align: "center",
       headerAlign: "center",
-      flex: 1,
       renderCell: (params) => (
         <p>{params?.row?.status} {params?.row?.status.includes('Complete') ? <CheckCircleIcon color="success"/> : ''} 
         </p>
