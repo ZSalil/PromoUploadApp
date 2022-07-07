@@ -89,13 +89,14 @@ const DashboardProvider = (props) => {
       obj.search_kw = '';
     }
 
-    if (selectedValues?.search_text?.value && params?.search_text !== "empty") {
+    if (selectedValues?.search_text?.value && params?.search_text !== "empty" && params?.page) {
       obj.search_kw = selectedValues?.search_text?.value;
     }
     if (obj) {
       qString = queryString.stringify(obj);
-    }
 
+      console.log(qString);
+    }
     setIsLoading(true);
     await orderService
       .customersOrder(qString)
