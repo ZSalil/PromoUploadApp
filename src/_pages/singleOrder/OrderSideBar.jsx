@@ -48,10 +48,9 @@ const OrderSideBar = () => {
 
           <a
             href="Single-order-sample.csv"
-            download="Multi Sample CSV"
             target="_blank"
           >
-            <Tooltip title="Sample File">
+            <Tooltip title="Single Sample File">
               <IconButton>
                 <DownloadForOfflineIcon />
               </IconButton>
