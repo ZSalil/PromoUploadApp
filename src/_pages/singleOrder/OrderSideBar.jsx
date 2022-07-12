@@ -16,6 +16,9 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import FormGroup from "@mui/material/FormGroup";
 import Switch from "@mui/material/Switch";
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 const OrderSideBar = () => {
   const {
     selectedValues,
@@ -37,11 +40,23 @@ const OrderSideBar = () => {
       <Stack spacing={2}>
         <Typography
           variant="h4"
-          className="border-bottom pb-2 border-success"
+          className="border-bottom pb-2 border-success d-flex justify-content-between"
           component="div"
           gutterBottom
         >
           Single Order
+
+          <a
+            href="Single-order-sample.csv"
+            download="Multi Sample CSV"
+            target="_blank"
+          >
+            <Tooltip title="Sample File">
+              <IconButton>
+                <DownloadForOfflineIcon />
+              </IconButton>
+            </Tooltip>
+          </a>
         </Typography>
         <FormControl>
           <FormLabel

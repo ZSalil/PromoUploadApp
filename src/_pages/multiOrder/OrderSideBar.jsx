@@ -13,6 +13,9 @@ import AutoFixHighTwoToneIcon from "@mui/icons-material/AutoFixHighTwoTone";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 const OrderSideBar = () => {
   const {
     selectedValues,
@@ -21,7 +24,8 @@ const OrderSideBar = () => {
     isLoading,
     handleProcess,
     isSubmittable,
-    orderType, setOrderType
+    orderType,
+    setOrderType,
   } = React.useContext(OrderContext);
   const handleOrderTypeChange = (event) => {
     setOrderType(event.target.value);
@@ -31,11 +35,22 @@ const OrderSideBar = () => {
       <Stack spacing={2}>
         <Typography
           variant="h4"
-          className="border-bottom pb-2 border-success"
+          className="border-bottom pb-2 border-success d-flex justify-content-between"
           component="div"
           gutterBottom
         >
           Multi Order
+          <a
+            href="Multi-order-sample.csv"
+            download="Multi Sample CSV"
+            target="_blank"
+          >
+            <Tooltip title="Sample File">
+              <IconButton>
+                <DownloadForOfflineIcon />
+              </IconButton>
+            </Tooltip>
+          </a>
         </Typography>
         <FormControl>
           <FormLabel
@@ -78,7 +93,7 @@ const OrderSideBar = () => {
               <FormControlLabel
                 value="jrau"
                 control={<Radio />}
-                label="Jaycar AU (jrau)" 
+                label="Jaycar AU (jrau)"
               />
               <FormControlLabel
                 value="jrnz"
