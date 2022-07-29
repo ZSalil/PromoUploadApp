@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { setMessage } from "../../_actions/message";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
-import { difference, keyBy, merge, slice, uniq, uniqBy, values } from "lodash";
+import { difference, isEmpty, keyBy, merge, slice, uniq, uniqBy, values } from "lodash";
 import Swal from "sweetalert2";
 
 export const OrderContext = React.createContext({
@@ -135,7 +135,11 @@ const OrderProvider = (props) => {
             part_number: obj[0]?.toUpperCase(),
             quantity: obj[1],
           }));
-          setItems(newProcessedArray);
+          if(newProcessedArray.some((obj=> (isEmpty(obj?.part_number) && isEmpty(obj?.quantity)))))
+          {
+            toast.warning('Rows with empty part-number or quantity is removed')
+          }
+          setItems(newProcessedArray.filter(obj=> (!isEmpty(obj?.part_number) && !isEmpty(obj?.quantity))));
           let po_name = "po_number";
           let customer_array = "customer_array";
           let cus_account = "customer_account";
