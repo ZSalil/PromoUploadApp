@@ -30,32 +30,33 @@ import WholesaleOrder from './_pages/multiOrder/index';
 
 import axios from 'axios';
 import { Navigate } from "react-router-dom";
+import ProtectedRoute from "./_common/ProtectedRoute";
 // For GET requests
 axios.interceptors.request.use(
   (req) => {
-     // Add configurations here
-     return req;
+    // Add configurations here
+    return req;
   },
   (err) => {
     console.log(err)
-     return Promise.reject(err);
+    return Promise.reject(err);
   }
 );
 
 // For POST requests
 axios.interceptors.response.use(
   (res) => {
-     // Add configurations here
+    // Add configurations here
     //  if (res.status === 201) {
     //  }
-     return res;
+    return res;
   },
   (err) => {
     if (err.response.status === 401) {
       <Navigate to="order-uploader/login" />
     }
 
-     return Promise.reject(err);
+    return Promise.reject(err);
   }
 );
 class App extends Component {
@@ -108,23 +109,15 @@ class App extends Component {
 
     return (
       <div>
-        <Alert/>
+        <Alert />
         <ResponsiveMenu />
         <div className="container mt-3">
           <Routes>
-            {/* <Route exact path={["/", "/home"]} component={Home} /> */}
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/login" element={<Login />} />
-            {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-            {/* {/* <Route path="/" element={<Dashboard />} /> */}
-            <Route path="/order" element={<Order />} />
-            <Route path="/multi-order" element={<WholesaleOrder />} />
+            <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
+            <Route path="/multi-order" element={<ProtectedRoute><WholesaleOrder /></ProtectedRoute>} />
             <Route path="/logout" element={<LogOut />} />
-            {/* <Route exact path="/register" component={Register} />
-            <Route exact path="/profile" component={Profile} />
-            <Route path="/user" component={BoardUser} />
-            <Route path="/mod" component={BoardModerator} />
-            <Route path="/admin" component={BoardAdmin} /> */}
           </Routes>
         </div>
 
