@@ -12,15 +12,16 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { useNavigate } from 'react-router';
+import { useNavigate } from "react-router";
 import { logout } from "../_actions/auth";
 
-
-const pages = [{ name: "Single Order", url: "/order" },{ name: "Multi Order", url: "/multi-order" }];
+const pages = [
+  { name: "Single Order", url: "/order" },
+  { name: "Multi Order", url: "/multi-order" },
+];
 
 const ResponsiveMenu = (props) => {
-
-  const {user,dispatch} = props;
+  const { user, dispatch } = props;
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [selectedPage, setSelectedPage] = React.useState(null);
@@ -42,10 +43,10 @@ const ResponsiveMenu = (props) => {
 
   const handleLogout = () => {
     // navigate('/logout')
-    dispatch(logout())
+    dispatch(logout());
 
-    navigate('/login')
-  }
+    navigate("/login");
+  };
 
   return (
     <AppBar position="static">
@@ -57,8 +58,13 @@ const ResponsiveMenu = (props) => {
             component="div"
             sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
           >
-            <Link to={"/"} onClick={()=>setSelectedPage('dashboard')}  className="navbar-brand text-white">
-            {process.env.REACT_APP_BRAND_NAME}<sup>{process.env.REACT_APP_VERSION}</sup>
+            <Link
+              to={"/"}
+              onClick={() => setSelectedPage("dashboard")}
+              className="navbar-brand text-white"
+            >
+              {process.env.REACT_APP_BRAND_NAME}
+              <sup>{process.env.REACT_APP_VERSION}</sup>
             </Link>
           </Typography>
 
@@ -91,14 +97,22 @@ const ResponsiveMenu = (props) => {
                 display: { xs: "block", md: "none" },
               }}
             >
-
-              {user && pages.map((page, index) => (
-                <MenuItem key={page}  onClick={handleCloseNavMenu}>
-                  <Link to={page.url} onClick={()=>setSelectedPage(page.name)} key={index} className="nav-link">
-                    {page.name} 
-                  </Link>
-                </MenuItem>
-              ))}
+              {user &&
+                pages.map((page, index) => (
+                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                    <Link
+                      to={page.url}
+                      onClick={() => setSelectedPage(page.name)}
+                      key={index}
+                      className="nav-link"
+                    >
+                      {page.name}
+                    </Link>
+                    <Link to={"/"} className="nav-link text-white">
+                      Dashboard
+                    </Link>
+                  </MenuItem>
+                ))}
             </Menu>
           </Box>
           <Typography
@@ -107,19 +121,32 @@ const ResponsiveMenu = (props) => {
             component="div"
             sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}
           >
-            <Link onClick={()=>setSelectedPage('dashboard')} to={"/"} className="navbar-brand text-white">
-            {process.env.REACT_APP_BRAND_NAME}
+            <Link
+              onClick={() => setSelectedPage("dashboard")}
+              to={"/"}
+              className="navbar-brand text-white"
+            >
+              {process.env.REACT_APP_BRAND_NAME}
             </Link>
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {user && pages.map((page,index) => (
-              <Link onClick={()=>setSelectedPage(page.name)} key={index}  to={page.url}  className={"nav-link text-white "+(selectedPage === page?.name ? 'selected-nav' : '') }>
-                {page.name}
-              </Link>
-            ))}
-             <Link to={"/"} className="nav-link text-white">
-                Dashboard
-              </Link>
+            {user &&
+              pages.map((page, index) => (
+                <Link
+                  onClick={() => setSelectedPage(page.name)}
+                  key={index}
+                  to={page.url}
+                  className={
+                    "nav-link text-white " +
+                    (selectedPage === page?.name ? "selected-nav" : "")
+                  }
+                >
+                  {page.name}
+                </Link>
+              ))}
+            <Link to={"/"} className="nav-link text-white">
+              Dashboard
+            </Link>
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
@@ -134,32 +161,30 @@ const ResponsiveMenu = (props) => {
                   </IconButton>
                 </Tooltip>
                 <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-            
-                <MenuItem  onClick={handleLogout}>
-                  <Typography textAlign="center">Logout</Typography>
-                </MenuItem>
-              
-            </Menu>
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
+                >
+                  <MenuItem onClick={handleLogout}>
+                    <Typography textAlign="center">Logout</Typography>
+                  </MenuItem>
+                </Menu>
               </React.Fragment>
             ) : (
               <React.Fragment>
-                <Link  to={"/login"} className="nav-link text-white">
-                Login
+                <Link to={"/login"} className="nav-link text-white">
+                  Login
                 </Link>
               </React.Fragment>
             )}
