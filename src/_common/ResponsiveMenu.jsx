@@ -117,9 +117,9 @@ const ResponsiveMenu = (props) => {
                 {page.name}
               </Link>
             ))}
-             {/* <Link to={"/login"} className="nav-link text-white">
-                Login
-              </Link> */}
+             <Link to={"/"} className="nav-link text-white">
+                Dashboard
+              </Link>
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
