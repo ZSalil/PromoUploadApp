@@ -273,8 +273,8 @@ const OrderProvider = (props) => {
           errorMessage.push(`<li>Product:${item?.product} order total: ${item?.total} is more than Buffer stock: ${item?.buffered_stock} </li>`)
         }
       }
-      setMessage({error:errorMessage})
-      setIsSubmittable(false);
+      setMessage({warning:errorMessage})
+      // setIsSubmittable(false);
     } else if (
       !finalList?.filter(
         (obj) => parseInt(obj?.quantity) > parseInt(obj?.free_stock)

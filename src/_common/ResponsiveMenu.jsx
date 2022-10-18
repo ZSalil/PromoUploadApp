@@ -18,6 +18,7 @@ import { logout } from "../_actions/auth";
 const pages = [
   { name: "Single Order", url: "/order" },
   { name: "Multi Order", url: "/multi-order" },
+  { name: "Dashboard", url: "/" },
 ];
 
 const ResponsiveMenu = (props) => {
@@ -108,11 +109,17 @@ const ResponsiveMenu = (props) => {
                     >
                       {page.name}
                     </Link>
+                    {/* <Link to={"/"} className="nav-link text-white">
+                      Dashboard
+                    </Link> */}
+                  </MenuItem>
+                ))}
+                {/* <MenuItem onClick={handleCloseNavMenu}>
+
                     <Link to={"/"} className="nav-link text-white">
                       Dashboard
                     </Link>
-                  </MenuItem>
-                ))}
+                  </MenuItem> */}
             </Menu>
           </Box>
           <Typography

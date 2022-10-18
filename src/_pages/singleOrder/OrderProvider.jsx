@@ -194,8 +194,8 @@ const OrderProvider = (props) => {
           errorMessage.push(`<li>Product:${item?.product} order quantity: ${item?.quantity} is more than Buffer stock: ${item?.buffered_stock} </li>`)
         }
       }
-      setMessage({error:errorMessage})
-      setIsSubmittable(false);
+      setMessage({warning:errorMessage})
+      // setIsSubmittable(false);
     }
     else if (message?.warning) {
       Swal.fire({
