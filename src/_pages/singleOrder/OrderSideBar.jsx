@@ -28,6 +28,7 @@ const OrderSideBar = () => {
     handleProcess,
     isSubmittable,
     handleHoldPickChange,
+    handlePuOverrideChange,
     orderType, setOrderType
   } = React.useContext(OrderContext);
   
@@ -100,6 +101,13 @@ const OrderSideBar = () => {
             name="holdPick"
             control={<Switch defaultChecked />}
             label="Hold Pick"
+          />
+
+          <FormControlLabel
+            onChange={handlePuOverrideChange}
+            name="puOverride"
+            control={<Switch/>}
+            label="Pickup Override"
           />
         </FormGroup>
         {orderType === "retail" ? (

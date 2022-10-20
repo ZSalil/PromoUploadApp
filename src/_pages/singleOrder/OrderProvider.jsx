@@ -73,6 +73,16 @@ const OrderProvider = (props) => {
       dispatch({ type: "form-value", name, fieldValue: "N" });
     }
   };
+  const handlePuOverrideChange = (event) => {
+    const { name } = event.target;
+    if (event.target.checked) {
+      dispatch({ type: "form-value", name, fieldValue: "PU" });
+    } else {
+      dispatch({ type: "form-value", name, fieldValue: "" });
+    }
+  };
+
+  
   const handleFormValueUpdate = (event) => {
     const { name, value } = event;
     dispatch({ type: "form-value", name, fieldValue: value });
@@ -186,6 +196,7 @@ const OrderProvider = (props) => {
       po_number: selectedValues?.po_number?.value,
       source: selectedValues?.source?.value,
       holdPick: selectedValues?.holdPick?.value,
+      puOverride: selectedValues?.puOverride?.value,
       raw_data: [
         [
           selectedValues?.po_number?.value,
@@ -291,6 +302,7 @@ const OrderProvider = (props) => {
         handleProcess,
         finalList,
         handleHoldPickChange,
+        handlePuOverrideChange,
         setFinalList,
         orderType,
         setOrderType,
