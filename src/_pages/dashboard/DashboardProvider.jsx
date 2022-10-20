@@ -87,8 +87,6 @@ const DashboardProvider = (props) => {
     }
     if (obj) {
       qString = queryString.stringify(obj);
-
-      console.log(qString);
     }
     setIsLoading(true);
     await orderService

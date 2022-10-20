@@ -89,20 +89,22 @@ const OrderProvider = (props) => {
     return 0;
   }
 
-  const processSingleOrder = (props) => {
+  const processSingleOrder = async (props) => {
     if (selectedValues?.source?.value) {
       setMessage(null);
       setIsLoading(true);
-      OrderService.processSingleOrder(props)
+     await OrderService.processSingleOrder(props)
         .then(({ data }) => {
           const newArray = merge(
             keyBy(data?.products, "product"),
-            keyBy(finalList, "part_number")
+            keyBy(finalList.map(({location,...other}) => other), "part_number")
           );
+          console.log(newArray);
           const _newArray = values(newArray);
           _newArray.sort(sortByError);
           setItems(_newArray);
           setFinalList(_newArray);
+          
           setIsLoading(false);
           if (data.isReadyForUpload) {
             setIsSubmittable(true);
@@ -113,11 +115,14 @@ const OrderProvider = (props) => {
             toast.error("Data is not Valid, Please Change and resubmit");
           }
           setMessage(data?.message);
+          validateBufferQuantity(_newArray);
         })
         .catch((_) => {
           toast.error("Something Wrong");
           setIsLoading(false);
         });
+
+       
     } else {
       toast.error("You must have to select a source before process");
     }
@@ -134,6 +139,7 @@ const OrderProvider = (props) => {
             id: index,
             part_number: obj[0]?.toUpperCase(),
             quantity: obj[1],
+            location: obj?.[2],
           }));
           if(newProcessedArray.some((obj=> (isEmpty(obj?.part_number) && isEmpty(obj?.quantity)))))
           {
@@ -171,8 +177,10 @@ const OrderProvider = (props) => {
 
   const onSubmit = () => {
     let arr = finalList
-      .map(({ part_number, quantity, ...obj }) => ({ part_number, quantity }))
+      .map(({ part_number, quantity,location, ...obj }) => ({ part_number, quantity,location }))
       .map((obj) => Object.keys(obj).map((k) => obj[k]));
+
+
     let object = {
       products: finalList,
       po_number: selectedValues?.po_number?.value,
@@ -185,19 +193,8 @@ const OrderProvider = (props) => {
         ],
       ].concat(arr), //process the data as like raw data
     };
-    if(orderType === 'wholesale' && finalList?.some(obj => parseInt(obj?.buffered_stock) !== 0 && (parseInt(obj?.buffered_stock) < parseInt(obj?.quantity)))){
-      toast.error('Product order quantity cannot be less than Bufferstock for wholesale order');
-      let errorMessage = [];
-      for(const item of finalList) {
-        if(parseInt(item?.buffered_stock) !== 0 && ( parseInt(item?.buffered_stock) < parseInt(item?.quantity)))
-        {
-          errorMessage.push(`<li>Product:${item?.product} order quantity: ${item?.quantity} is more than Buffer stock: ${item?.buffered_stock} </li>`)
-        }
-      }
-      setMessage({warning:errorMessage})
-      // setIsSubmittable(false);
-    }
-    else if (message?.warning) {
+    
+    if (message?.warning) {
       Swal.fire({
         title: "Are you sure?",
         text: "Some Products maybe out of stock, still want to proceed with the order ?",
@@ -219,6 +216,7 @@ const OrderProvider = (props) => {
   const orderConfirm = (params) => {
     setMessage(null);
     setIsLoading(true);
+
     OrderService.saveSingleOrder(params)
       .then(({ data }) => {
         setIsLoading(false);
@@ -233,14 +231,36 @@ const OrderProvider = (props) => {
       });
   };
 
+
+  const validateBufferQuantity = (_newArray) => {
+    if(orderType === 'wholesale' && _newArray?.some(obj => parseInt(obj?.buffered_stock) !== 0 && (parseInt(obj?.buffered_stock) < parseInt(obj?.quantity)))){
+      toast.error('Product order quantity cannot be less than Bufferstock for wholesale order');
+      let errorMessage = [];
+      for(const item of finalList) {
+        if(parseInt(item?.buffered_stock) !== 0 && ( parseInt(item?.buffered_stock) < parseInt(item?.quantity)))
+        {
+          // errorMessage.push(`<li>Product:${item?.product} order quantity: ${item?.quantity} is more than Buffer stock: ${item?.buffered_stock} </li>`)
+          toast.warning(`Product:${item?.product} order quantity: ${item?.quantity} is more than Buffer stock: ${item?.buffered_stock}`);
+        }
+      }
+      // if(message?.warning.length)
+      // {
+      //   errorMessage = errorMessage.concat(message?.warning)
+      // }
+      // setMessage({warning:errorMessage})
+      // setIsSubmittable(false);
+    }
+  }
+
   const handleProcess = () => {
     if (!finalList?.length || finalList?.length < 1) {
       toast.error("Please upload a proper file first");
       setIsLoading(false);
     } else {
       let arr = finalList
-        .map(({ part_number, quantity, ...obj }) => ({ part_number, quantity }))
+        .map(({ part_number, quantity,location, ...obj }) => ({ part_number, quantity,location }))
         .map((obj) => Object.keys(obj).map((k) => obj[k]));
+        console.log(arr);
       let object = {
         products: finalList,
         po_number: selectedValues?.po_number?.value,
