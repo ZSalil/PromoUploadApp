@@ -93,8 +93,14 @@ const DashboardProvider = (props) => {
       .customersOrder(qString)
       .then(({ data: { data, ...others } }) => {
         let processedData = data?.map((obj, index) => ({ id: index, ...obj }));
-        setItems(processedData);
-        setPaginateItems(others);
+        if(processedData)
+        {
+          setItems(processedData);
+          setPaginateItems(others);
+        }
+        else {
+          toast.warning("No data Found!")
+        }
         setIsLoading(false);
       })
       .catch((_) => {

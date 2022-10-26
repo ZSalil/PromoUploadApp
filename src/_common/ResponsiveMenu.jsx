@@ -17,8 +17,7 @@ import { logout } from "../_actions/auth";
 
 const pages = [
   { name: "Single Order", url: "/order" },
-  { name: "Multi Order", url: "/multi-order" },
-  { name: "Dashboard", url: "/" },
+  { name: "Multi Order", url: "/multi-order" }
 ];
 
 const ResponsiveMenu = (props) => {
