@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import Papa from "papaparse";
 import {
   difference,
+  isEmpty,
   keyBy,
   merge,
   slice,
@@ -148,6 +149,9 @@ const OrderProvider = (props) => {
       },
     });
     let newColumn = [];
+
+    let columns = ["marketing", "wholesale", "Marketing", "Wholesale"];
+    let columnName = "";
     Papa.parse(file, {
       header: true,
       dynamicTyping: true,
@@ -156,11 +160,24 @@ const OrderProvider = (props) => {
         if (data?.length > 0) {
           let newProcessedArray = data.map((obj, index) => {
             let qtyObj = Object.assign({}, obj);
-            delete qtyObj[Object.keys(qtyObj)[Object.keys(qtyObj).length - 1]];
 
+            let columnFind = columns.find((prop) => prop in qtyObj); // Check in  the object any key from columns array exist or not
+
+            let columnValue = qtyObj[columnFind]; // Get the value if exist
+
+
+            if (!isEmpty(columnFind)) {
+              columns.forEach((prop) => delete qtyObj[prop]);
+            } else {
+              delete qtyObj[
+                Object.keys(qtyObj)[Object.keys(qtyObj).length - 1]
+              ];
+            }
+
+            console.log(qtyObj);
             return {
               product_number:
-                obj[Object.keys(obj)[Object.keys(obj).length - 1]]?.toUpperCase(),
+              columnValue?.toUpperCase(),
               id: index,
               total: sum(Object.values(qtyObj)),
               ...obj,
@@ -249,6 +266,14 @@ const OrderProvider = (props) => {
       },
     });
   };
+  function removeVowelKeys(object) {
+    for (let key in object) {
+      if (key.match(/^[aeiouy]/)) {
+        delete object[key];
+      }
+    }
+    return object;
+  }
 
   const onSubmit = async () => {
     const duplicate = isProductUnique();
@@ -260,20 +285,26 @@ const OrderProvider = (props) => {
     } else if (
       orderType === "wholesale" &&
       finalList?.some(
-        (obj) =>  parseInt(obj?.buffered_stock) !== 0 && ( parseInt(obj?.buffered_stock) < parseInt(obj?.total))
+        (obj) =>
+          parseInt(obj?.buffered_stock) !== 0 &&
+          parseInt(obj?.buffered_stock) < parseInt(obj?.total)
       )
     ) {
       toast.error(
         "Product order quantity cannot be less than Bufferstock for wholesale order"
       );
       let errorMessage = [];
-      for(const item of finalList) {
-        if(parseInt(item?.buffered_stock) !== 0 && (parseInt(item?.buffered_stock) < parseInt(item?.total)))
-        {
-          errorMessage.push(`<li>Product:${item?.product} order total: ${item?.total} is more than Buffer stock: ${item?.buffered_stock} </li>`)
+      for (const item of finalList) {
+        if (
+          parseInt(item?.buffered_stock) !== 0 &&
+          parseInt(item?.buffered_stock) < parseInt(item?.total)
+        ) {
+          errorMessage.push(
+            `<li>Product:${item?.product} order total: ${item?.total} is more than Buffer stock: ${item?.buffered_stock} </li>`
+          );
         }
       }
-      setMessage({warning:errorMessage})
+      setMessage({ warning: errorMessage });
       // setIsSubmittable(false);
     } else if (
       !finalList?.filter(
