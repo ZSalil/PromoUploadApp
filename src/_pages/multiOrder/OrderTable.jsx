@@ -46,13 +46,13 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const OrderTable = ({ dispatch }) => {
-  const { items, setFinalList, message,isLoading, columns, setColumns } =
+  const { items, setFinalList, message,isLoading, columns } =
     React.useContext(OrderContext);
   const [rows, setRows] = React.useState(items);
 
   const [columnData, setColumnData] = React.useState();
   const [rowModesModel, setRowModesModel] = React.useState({});
-
+console.log(columns)
   React.useEffect(() => {
     setRows(items);
   }, [items]);

@@ -26,7 +26,6 @@ const defaultColumn = [
     align: "center",
     headerAlign: "center",
     width: 180,
-    editable: true,
   },
 ];
 
@@ -151,7 +150,6 @@ const OrderProvider = (props) => {
     let newColumn = [];
 
     let columns = ["marketing", "wholesale", "Marketing", "Wholesale"];
-    let columnName = "";
     Papa.parse(file, {
       header: true,
       dynamicTyping: true,
@@ -189,11 +187,10 @@ const OrderProvider = (props) => {
               headerName: value,
               align: "center",
               headerAlign: "center",
-              width: 180,
-              editable: true,
-              flex: 1,
+              width: 100,
             });
           });
+
           setColumns([
             ...defaultColumn,
             ...newColumn,
