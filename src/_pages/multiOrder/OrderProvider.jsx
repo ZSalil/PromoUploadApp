@@ -311,6 +311,7 @@ const OrderProvider = (props) => {
       let object = {
         raw_data: selectedValues?.rawValue?.value,
         source: selectedValues?.source?.value,
+        holdPick: selectedValues?.holdPick?.value,
       };
       if (message?.warning) {
         Swal.fire({
@@ -333,7 +334,14 @@ const OrderProvider = (props) => {
       toast.error("Please Fix or remove the red rows");
     }
   };
-
+  const handleHoldPickChange = (event) => {
+    const { name } = event.target;
+    if (event.target.checked) {
+      dispatch({ type: "form-value", name, fieldValue: "Y" });
+    } else {
+      dispatch({ type: "form-value", name, fieldValue: "N" });
+    }
+  };
   const orderConfirm = (params) => {
     setMessage(null);
     setIsLoading(true);
@@ -381,7 +389,7 @@ const OrderProvider = (props) => {
         handleProcess,
         finalList,
         setFinalList,
-        orderType,
+        orderType,handleHoldPickChange,
         setOrderType,
       }}
     >

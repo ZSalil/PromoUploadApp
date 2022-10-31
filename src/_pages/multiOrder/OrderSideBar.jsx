@@ -16,6 +16,8 @@ import Typography from "@mui/material/Typography";
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import Switch from "@mui/material/Switch";
+import { FormGroup } from "@material-ui/core";
 const OrderSideBar = () => {
   const {
     selectedValues,
@@ -24,6 +26,7 @@ const OrderSideBar = () => {
     isLoading,
     handleProcess,
     isSubmittable,
+    handleHoldPickChange,
     orderType,
     setOrderType,
   } = React.useContext(OrderContext);
@@ -149,6 +152,15 @@ const OrderSideBar = () => {
         ) : (
           ""
         )}
+
+<FormGroup>
+          <FormControlLabel
+            onChange={handleHoldPickChange}
+            name="holdPick"
+            control={<Switch defaultChecked />}
+            label="Hold Pick"
+          />
+        </FormGroup>
         <LoadingButton
           onClick={handleProcess}
           endIcon={<AutoFixHighTwoToneIcon />}
