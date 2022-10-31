@@ -149,7 +149,7 @@ const OrderProvider = (props) => {
     });
     let newColumn = [];
 
-    let columns = ["marketing", "wholesale", "Marketing", "Wholesale"];
+    let columns = ["marketing", "wholesale", "Marketing", "Wholesale", "MARKETING","WHOLESALE"];
     Papa.parse(file, {
       header: true,
       dynamicTyping: true,
