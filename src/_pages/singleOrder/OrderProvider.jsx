@@ -147,8 +147,8 @@ const OrderProvider = (props) => {
           let newArray = slice(data, 1, data.length);
           const newProcessedArray = newArray.map((obj, index) => ({
             id: index,
-            part_number: obj[0]?.toUpperCase(),
-            quantity: obj[1],
+            part_number: obj[0]?.toUpperCase()?.trim(),
+            quantity: obj[1]?.trim(),
             location: obj?.[2],
           }));
           if(newProcessedArray.some((obj=> (isEmpty(obj?.part_number) && isEmpty(obj?.quantity)))))
