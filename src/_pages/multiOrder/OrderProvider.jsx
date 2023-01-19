@@ -1,9 +1,6 @@
 import React, { useEffect, useReducer, useState } from "react";
 import OrderService from "../../_services/order.service";
-import moment from "moment";
-import { SET_MESSAGE } from "../../_actions/types";
 import { connect } from "react-redux";
-import { setMessage } from "../../_actions/message";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
 import {
@@ -11,9 +8,7 @@ import {
   isEmpty,
   keyBy,
   merge,
-  slice,
   sum,
-  uniq,
   uniqBy,
   values,
 } from "lodash";
@@ -152,7 +147,6 @@ const OrderProvider = (props) => {
     let columns = ["marketing", "wholesale", "Marketing", "Wholesale", "MARKETING","WHOLESALE"];
     Papa.parse(file, {
       header: true,
-      dynamicTyping: true,
       skipEmptyLines: true,
       complete: function ({ data, meta: { fields } }) {
         if (data?.length > 0) {
@@ -171,13 +165,12 @@ const OrderProvider = (props) => {
                 Object.keys(qtyObj)[Object.keys(qtyObj).length - 1]
               ];
             }
-
             console.log(qtyObj);
             return {
               product_number:
               columnValue?.toUpperCase(),
               id: index,
-              total: sum(Object.values(qtyObj)),
+              total: sum(Object.values(qtyObj).map(Number)),
               ...obj,
             };
           });
