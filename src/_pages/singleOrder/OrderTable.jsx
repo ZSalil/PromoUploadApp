@@ -152,10 +152,11 @@ const OrderTable = ({dispatch}) => {
     },
     {
       field: "free_stock",
-      headerName: "Available Stock",
+      headerName: "Available Company Stock",
       type: "number",
       align: "center",
       headerAlign: "center",
+      width: 180,
       flex: 1,
     },
     {
