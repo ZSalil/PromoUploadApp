@@ -75,19 +75,19 @@ class App extends Component {
     });
   }
 
-  componentDidMount() {
-    const user = this.props.user;
+  // componentDidMount() {
+  //   const user = this.props.user;
 
-    if (user) {
-      this.setState({
-        currentUser: user,
-      });
-    }
+  //   if (user) {
+  //     this.setState({
+  //       currentUser: user,
+  //     });
+  //   }
 
-    EventBus.on("logout", () => {
-      this.logOut();
-    });
-  }
+  //   EventBus.on("logout", () => {
+  //     this.logOut();
+  //   });
+  // }
 
   componentWillUnmount() {
     EventBus.remove("logout");
@@ -114,8 +114,8 @@ class App extends Component {
         <div className="container mt-3">
           <Routes>
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/order" element={<ProtectedRoute><Order /></ProtectedRoute>} />
+            <Route path="/login" element={<Login />} /> 
+            <Route path="/order" element={<Order />} />
             <Route path="/multi-order" element={<ProtectedRoute><WholesaleOrder /></ProtectedRoute>} />
             <Route path="/logout" element={<LogOut />} />
           </Routes>

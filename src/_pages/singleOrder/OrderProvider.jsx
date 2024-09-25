@@ -1,13 +1,13 @@
 import React, { useEffect, useReducer, useState } from "react";
-import OrderService from "../../_services/order.service";
-import moment from "moment";
-import { SET_MESSAGE } from "../../_actions/types";
-import { connect } from "react-redux";
-import { setMessage } from "../../_actions/message";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
-import { difference, isEmpty, keyBy, merge, slice, uniq, uniqBy, values } from "lodash";
-import Swal from "sweetalert2";
+import { isEmpty, slice } from "lodash";
+import axios from "axios";
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
 
 export const OrderContext = React.createContext({
   selectedValues: {},
@@ -17,15 +17,11 @@ export const OrderContext = React.createContext({
 function reducer(state, action) {
   switch (action.type) {
     case "form-value":
-      console.log(state);
       return {
         ...state,
         selectedValues: {
           ...state.selectedValues,
-          [action.name]: {
-            ...state.selectedValues[action.name],
-            value: action.fieldValue,
-          },
+          [action.name]: action.fieldValue,
         },
       };
     case "reset":
@@ -45,96 +41,44 @@ const OrderProvider = (props) => {
 
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [finalList, setFinalList] = React.useState([]);
-  const [isSubmittable, setIsSubmittable] = React.useState(false);
-  const [message, setMessage] = React.useState(null);
-  const [orderType, setOrderType] = React.useState("retail");
-  useEffect(() => {}, []);
-
-  // Handle form change
-  const handleChange = (event) => {
-    const { type, name, value } = event.target;
-    const fieldValue = value;
-    dispatch({ type: "form-value", name, fieldValue });
-  };
-
-  function isProductUnique() {
-    return difference(
-      finalList,
-      uniqBy(finalList, "part_number"),
-      "part_number"
-    );
-  }
-  const handleHoldPickChange = (event) => {
-    const { name } = event.target;
-    if (event.target.checked) {
-      dispatch({ type: "form-value", name, fieldValue: "Y" });
-    } else {
-      dispatch({ type: "form-value", name, fieldValue: "N" });
-    }
-  };
-  const handlePuOverrideChange = (event) => {
-    const { name } = event.target;
-    if (event.target.checked) {
-      dispatch({ type: "form-value", name, fieldValue: "PU" });
-    } else {
-      dispatch({ type: "form-value", name, fieldValue: "" });
-    }
-  };
-
+  const [finalList, setFinalList] = useState([]);
+  const [message, setMessage] = useState(null);
+  const [orderType, setOrderType] = useState("jaycar-au");
+  const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
   
-  const handleFormValueUpdate = (event) => {
-    const { name, value } = event;
-    dispatch({ type: "form-value", name, fieldValue: value });
+  // State for managing the dialog visibility and content
+  const [openDialog, setOpenDialog] = useState(false);
+  const [highDiscountItems, setHighDiscountItems] = useState([]);
+
+  const submitOrderToDB = async (products, startDate, endDate, orderType) => {
+    try {
+      for (const item of products) {
+        const { part_number, quantity } = item;
+
+        await axios.post("http://localhost:5000/api/v1/promo-uploader/insert-item", {
+          item_code: part_number,
+          price: quantity,
+          effective_date: startDate,
+          end_date: endDate,
+          orderType: orderType,
+        });
+      }
+
+      toast.success("Promotion prices successfully updated.");
+    } catch (error) {
+      console.error("Error adding items to the database:", error);
+      toast.error("Failed to add items to the database.");
+    }
   };
 
-  function sortByError(a, b) {
-    if (parseInt(a.quantity) < parseInt(a.free_stock)) {
-      return 1;
-    }
-    if (parseInt(a.quantity) > parseInt(a.free_stock)) {
-      return -1;
-    }
-
-    return 0;
-  }
-
-  const processSingleOrder = async (props) => {
-    if (selectedValues?.source?.value) {
-      setMessage(null);
-      setIsLoading(true);
-     await OrderService.processSingleOrder(props)
-        .then(({ data }) => {
-          const newArray = merge(
-            keyBy(data?.products, "product"),
-            keyBy(finalList.map(({location,...other}) => other), "part_number")
-          );
-          console.log(newArray);
-          const _newArray = values(newArray);
-          _newArray.sort(sortByError);
-          setItems(_newArray);
-          setFinalList(_newArray);
-          
-          setIsLoading(false);
-          if (data.isReadyForUpload) {
-            setIsSubmittable(true);
-          } else {
-            setIsSubmittable(false);
-          }
-          if (!data?.validate) {
-            toast.error("Data is not Valid, Please Change and resubmit");
-          }
-          setMessage(data?.message);
-          validateBufferQuantity(_newArray);
-        })
-        .catch((_) => {
-          toast.error("Something Wrong");
-          setIsLoading(false);
-        });
-
-       
-    } else {
-      toast.error("You must have to select a source before process");
+  // Fetch original price from backend based on item_code
+  const fetchOriginalPrice = async (part_number, orderType) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/get-original-price/${orderType}/${part_number}`); 
+      return response.data.originalPrice;
+    } catch (error) {
+      console.error("Error fetching original price:", error);
+      return 0;
     }
   };
 
@@ -142,182 +86,137 @@ const OrderProvider = (props) => {
     Papa.parse(file, {
       header: false,
       skipEmptyLines: true,
-      complete: function ({ data }) {
+      complete: async function ({ data }) {
         if (data?.length > 1) {
-          let newArray = slice(data, 1, data.length);
-          const newProcessedArray = newArray.map((obj, index) => ({
-            id: index,
-            part_number: obj[0]?.toUpperCase()?.trim(),
-            quantity: obj[1]?.trim(),
-            location: obj?.[2],
-          }));
-          if(newProcessedArray.some((obj=> (isEmpty(obj?.part_number) && isEmpty(obj?.quantity)))))
-          {
-            toast.warning('Rows with empty part-number or quantity is removed')
-          }
-          setItems(newProcessedArray.filter(obj=> (!isEmpty(obj?.part_number) && !isEmpty(obj?.quantity))));
-          let po_name = "po_number";
-          let customer_array = "customer_array";
-          let cus_account = "customer_account";
-          let po_data = data[0][0];
-          let acc_data = data[0][1];
-          dispatch({ type: "form-value", name: po_name, fieldValue: po_data });
+          const newArray = slice(data, 1);
+
+          const newProcessedArray = await Promise.all(
+            newArray.map(async (obj, index) => {
+              const part_number = obj[0]?.toUpperCase()?.trim();
+              let quantityString = obj[1]?.trim();
+              let quantity = parseFloat(quantityString.replace(/[^0-9.-]+/g, ""));
+
+              if (isNaN(quantity)) {
+                return null;
+              }
+
+              const originalPrice = await fetchOriginalPrice(part_number, orderType);
+              console.log(`Original price for ${part_number}: ${originalPrice}`);
+
+              const discountPercentage = (originalPrice && quantity)
+                ? ((originalPrice - quantity) / originalPrice) * 100
+                : null;
+
+              return {
+                id: index,
+                part_number,
+                quantity: quantity.toFixed(2),
+                discount: discountPercentage !== null
+                  ? discountPercentage.toFixed(2) + '%'
+                  : "0%",
+              };
+            })
+          );
+
+          setItems(newProcessedArray);
+          setFinalList(newProcessedArray);
           dispatch({
             type: "form-value",
-            name: customer_array,
-            fieldValue: data[0],
-          });
-          dispatch({
-            type: "form-value",
-            name: cus_account,
-            fieldValue: acc_data,
-          });
-          dispatch({
-            type: "form-value",
-            name: "products",
+            name: "items",
             fieldValue: newProcessedArray,
           });
         }
-
-        console.log(data);
       },
     });
-    setMessage(null);
   };
 
-  const onSubmit = () => {
-    let arr = finalList
-      .map(({ part_number, quantity,location, ...obj }) => ({ part_number, quantity,location }))
-      .map((obj) => Object.keys(obj).map((k) => obj[k]));
+  // Function to check if any discounts exceed 35%
+  const checkDiscounts = () => {
+    const itemsWithHighDiscounts = finalList.filter(item => {
+      const discountValue = parseFloat(item.discount.replace('%', '')); // Parse the discount value
+      return discountValue > 35; // Check for discounts above 35%
+    });
 
-
-    let object = {
-      products: finalList,
-      po_number: selectedValues?.po_number?.value,
-      source: selectedValues?.source?.value,
-      holdPick: selectedValues?.holdPick?.value,
-      puOverride: selectedValues?.puOverride?.value,
-      raw_data: [
-        [
-          selectedValues?.po_number?.value,
-          selectedValues?.customer_account?.value,
-        ],
-      ].concat(arr), //process the data as like raw data
-    };
-    
-    if (message?.warning) {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Some Products maybe out of stock, still want to proceed with the order ?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, Order it!",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          orderConfirm(object);
-        }
-      });
-    } else {
-      orderConfirm(object);
+    if (itemsWithHighDiscounts.length > 0) {
+      setHighDiscountItems(itemsWithHighDiscounts); // Store high discount items
+      setOpenDialog(true); // Open the dialog to warn the user
     }
   };
 
-  const orderConfirm = (params) => {
-    setMessage(null);
-    setIsLoading(true);
-
-    OrderService.saveSingleOrder(params)
-      .then(({ data }) => {
-        setIsLoading(false);
-        if (data?.orderConfirmed) {
-          toast.success("Successfully Order Complete");
-        }
-        setMessage(data?.message);
-      })
-      .catch((_) => {
-        toast.error("Something Wrong");
-        setIsLoading(false);
-      });
-  };
-
-
-  const validateBufferQuantity = (_newArray) => {
-    if(orderType === 'wholesale' && _newArray?.some(obj => parseInt(obj?.buffered_stock) !== 0 && (parseInt(obj?.buffered_stock) < parseInt(obj?.quantity)))){
-      toast.error('Product order quantity cannot be less than Bufferstock for wholesale order');
-      let errorMessage = [];
-      for(const item of finalList) {
-        if(parseInt(item?.buffered_stock) !== 0 && ( parseInt(item?.buffered_stock) < parseInt(item?.quantity)))
-        {
-          // errorMessage.push(`<li>Product:${item?.product} order quantity: ${item?.quantity} is more than Buffer stock: ${item?.buffered_stock} </li>`)
-          toast.warning(`Product:${item?.product} order quantity: ${item?.quantity} is more than Buffer stock: ${item?.buffered_stock}`);
-        }
-      }
-      // if(message?.warning.length)
-      // {
-      //   errorMessage = errorMessage.concat(message?.warning)
-      // }
-      // setMessage({warning:errorMessage})
-      // setIsSubmittable(false);
-    }
-  }
-
-  const handleProcess = () => {
-    if (!finalList?.length || finalList?.length < 1) {
-      toast.error("Please upload a proper file first");
+  // Process Data: Only validate and prepare the data
+  const handleProcess = (startDate, endDate) => {
+    if (!finalList.length || !selectedValues.items?.length) {
+      toast.error("Please upload a proper file first.");
       setIsLoading(false);
-    } else {
-      let arr = finalList
-        .map(({ part_number, quantity,location, ...obj }) => ({ part_number, quantity,location }))
-        .map((obj) => Object.keys(obj).map((k) => obj[k]));
-        console.log(arr);
-      let object = {
-        products: finalList,
-        po_number: selectedValues?.po_number?.value,
-        source: selectedValues?.source?.value,
-        raw_data: [
-          [
-            selectedValues?.po_number?.value,
-            selectedValues?.customer_account?.value,
-          ],
-        ].concat(arr), //process the data as like raw data
-      };
-      processSingleOrder(object);
+      setIsSubmitEnabled(false);
+      return;
     }
+
+    checkDiscounts(); // Call the checkDiscounts function
+
+    toast.success("Data is ready for submission.");
+    setIsSubmitEnabled(true);
+  };
+
+  const handleSubmit = (startDate, endDate, orderType) => {
+    if (!finalList.length) {
+      toast.error("No data available to submit.");
+      return;
+    }
+
+    submitOrderToDB(finalList, startDate, endDate, orderType);
   };
 
   return (
     <OrderContext.Provider
       value={{
         message,
-        isSubmittable,
-        handleFormValueUpdate,
         items,
         isLoading,
         processCsv,
         selectedValues,
-        handleChange,
-        onSubmit,
         handleProcess,
+        handleSubmit,
         finalList,
-        handleHoldPickChange,
-        handlePuOverrideChange,
         setFinalList,
         orderType,
         setOrderType,
+        isSubmitEnabled,
+        setIsSubmitEnabled,
       }}
     >
       {props.children}
+
+      {/* Dialog for high discount warning */}
+      <Dialog
+  open={openDialog}
+  onClose={() => setOpenDialog(false)}
+  aria-labelledby="discount-warning-title"
+>
+  <DialogTitle id="discount-warning-title">Warning: High Discounts</DialogTitle>
+  <DialogContent>
+    <p>The following items have a discount greater than 35%:</p>
+    <ul>
+      {highDiscountItems.map(item => (
+        <li key={item.id}>
+          {item.part_number}: {item.discount} discount
+        </li>
+      ))}
+    </ul>
+    {/* Additional message to disregard if data is valid */}
+    <p style={{ marginTop: '16px', fontWeight: 'bold' }}>
+      If the data is valid, please disregard this warning and click the submit button to proceed.
+    </p>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenDialog(false)} color="primary">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </OrderContext.Provider>
   );
 };
 
-function mapStateToProps(state) {
-  const { user } = state.auth;
-  return {
-    user,
-  };
-}
-
-export default connect(mapStateToProps)(OrderProvider);
+export default OrderProvider;

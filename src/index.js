@@ -1,19 +1,17 @@
-import React from "react";
-import ReactDOM from 'react-dom/client';
-import { Provider } from "react-redux";
-import { BrowserRouter } from "react-router-dom";
-import App from "./App";
-import { AxiosInterceptor } from "./AxiosInterceptor";
-import store from './store.js'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import store from './store'; 
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <BrowserRouter basename="/order-uploader">
-    <AxiosInterceptor>
+ReactDOM.render(
+  <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </Provider>
-    </AxiosInterceptor>
-
-  </BrowserRouter>
+  </React.StrictMode>,
+  document.getElementById('root')
 );

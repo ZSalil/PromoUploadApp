@@ -17,17 +17,14 @@ import {
   DataGrid,
   GridToolbarContainer,
   GridActionsCellItem,
-  GridToolbar 
+  GridToolbar
 } from "@mui/x-data-grid";
-import {
-  randomId,
-} from "@mui/x-data-grid-generator";
+import { randomId } from "@mui/x-data-grid-generator";
 import { OrderContext } from "./OrderProvider";
 import OrderSideBar from './OrderSideBar';
 import { connect } from 'react-redux';
 import { Alert } from "@mui/material";
-
-
+import axios from "axios"; // Import axios to fetch original price
 
 function EditToolbar(props) {
   const { setRows, setRowModesModel } = props;
@@ -37,12 +34,10 @@ function EditToolbar(props) {
     setRows((oldRows) => [
       { id, part_number: "", quantity: "", isNew: true },
       ...oldRows
-     
     ]);
     setRowModesModel((oldModel) => ({
       [id]: { mode: GridRowModes.Edit, fieldToFocus: "part_number" },
       ...oldModel
-      
     }));
   };
 
@@ -69,17 +64,19 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-const OrderTable = ({dispatch}) => {
-  const { items, setFinalList,message ,isLoading,orderType} = React.useContext(OrderContext);
+const OrderTable = ({ dispatch }) => {
+  const { items, setFinalList, message, isLoading, orderType } = React.useContext(OrderContext);
   const [rows, setRows] = React.useState(items);
   const [rowModesModel, setRowModesModel] = React.useState({});
+
   React.useEffect(() => {
     setRows(items);
   }, [items]);
 
   React.useEffect(() => {
     setFinalList(rows);
-  }, [rows]);
+  }, [rows, setFinalList]);
+
   const handleRowEditStart = (params, event) => {
     event.defaultMuiPrevented = true;
   };
@@ -93,10 +90,7 @@ const OrderTable = ({dispatch}) => {
   };
 
   const handleSaveClick = (id) => () => {
-    console.log(id);
-    setFinalList(rows)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-
   };
 
   const handleDeleteClick = (id) => () => {
@@ -113,150 +107,128 @@ const OrderTable = ({dispatch}) => {
     if (editedRow.isNew) {
       setRows(rows.filter((row) => row.id !== id));
     }
-
   };
 
-  const processRowUpdate = (newRow) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
-
-  const hideColumn= ()=> {
-
-    if(orderType === 'wholesale')
-    {
-      return false;
+  const fetchOriginalPrice = async (part_number, orderType) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/get-original-price/${orderType}/${part_number}`); // Ensure full URL is used
+        return response.data.originalPrice;
+    } catch (error) {
+        console.error("Error fetching original price:", error);
+        return 0; // Return 0 if the price is not found
     }
-    return true;
-  }
+};
 
-  const columns = [
-    {
-      field: "part_number",
-      headerName: "Part Number",
-      align: "center",
-      headerAlign: "center",
-      width: 180,
-      editable: true,
-      flex: 1,
-    },
-    {
-      field: "quantity",
-      headerName: "Quantity",
-      type: "number",
-      align: "center",
-      headerAlign: "center",
-      editable: true,
-      flex: 1,
-    },
-    {
-      field: "free_stock",
-      headerName: "Available Company Stock",
-      type: "number",
-      align: "center",
-      headerAlign: "center",
-      width: 180,
-      flex: 1,
-    },
-    {
-      field: "buffered_stock",
-      headerName: "Buff. Stock",
-      align: "center",
-      headerAlign: "center",
-      hide: hideColumn(),
-      flex: 1,
-    },
-    {
-      field: "uom",
-      headerName: "Unit",
-      align: "center",
-      headerAlign: "center",
-      flex: 1,
-    },
-    {
-      field: "location",
-      headerName: "Location",
-      align: "center",
-      headerAlign: "center",
-      flex: 1,
-    },
-    {
-      field: "adn",
-      headerName: "ADN",
-      align: "center",
-      headerAlign: "center",
-      flex: 1,
-    },
-    {
-      field: "mdn_link",
-      headerName: "Mdm Link",
-      align: "center",
-      headerAlign: "center",
-      width: 100,
-      renderCell: (params) => (
-        <strong>
-          <a target="_blank" href={`http://branch.jaycar.com.au/mdm/index.php?itemCode=${params?.row?.part_number}&page=description&catalogueversion=`}>
-            Mdm Page
-          </a>
-        </strong>
-      ),
-    },
-    {
-      field: "actions",
-      type: "actions",
-      align: "right",
-      headerAlign: "right",
-      headerName: "Actions",
-      width: 100,
-      cellClassName: "actions",
-      flex: 1,
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+const processRowUpdate = async (newRow) => {
+  const originalPrice = await fetchOriginalPrice(newRow.part_number, orderType); // Fetch original price based on orderType
 
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              icon={<SaveIcon />}
-              label="Save"
-              onClick={handleSaveClick(id)}
-              color="primary"
-            />,
-            <GridActionsCellItem
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
+  // If the original price is found and is greater than 0, calculate discount
+  const discount = (originalPrice && originalPrice > 0) 
+  ? ((originalPrice - parseFloat(newRow.quantity)) / originalPrice * 100).toFixed(2)
+  : "0.00"; 
 
+  const updatedRow = {
+      ...newRow,
+      isNew: false,
+      discount: `${discount}%`,  // Append "%" to the discount value
+  };
+
+  // Update the rows in the table with the updated row
+  setRows((prevRows) => prevRows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+  setFinalList((prevList) => prevList.map((row) => (row.id === newRow.id ? updatedRow : row)));
+
+  return updatedRow;
+};
+  
+  
+
+const columns = [
+  {
+    field: "part_number",
+    headerName: "Item",
+    align: "center",
+    headerAlign: "center",
+    width: 180,
+    editable: true,
+    flex: 1,
+  },
+  {
+    field: "quantity",
+    headerName: "Price",
+    type: "number",
+    align: "center",
+    headerAlign: "center",
+    editable: true,
+    flex: 1,
+  },
+  {
+    field: "discount",
+    headerName: "Discount (%)",
+    align: "center",
+    headerAlign: "center",
+    flex: 1,
+    valueFormatter: (params) => {
+      // Ensure it always shows with percentage and handles missing values
+      return params.value ? params.value : "0";
+    },
+  },
+  {
+    field: "actions",
+    type: "actions",
+    align: "right",
+    headerAlign: "right",
+    headerName: "Actions",
+    width: 100,
+    cellClassName: "actions",
+    flex: 1,
+    getActions: ({ id }) => {
+      const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+
+      if (isInEditMode) {
         return [
           <GridActionsCellItem
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-            color="inherit"
+            icon={<SaveIcon />}
+            label="Save"
+            onClick={handleSaveClick(id)}
+            color="primary"
           />,
           <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
+            icon={<CancelIcon />}
+            label="Cancel"
+            className="textPrimary"
+            onClick={handleCancelClick(id)}
             color="inherit"
           />,
         ];
-      },
+      }
+
+      return [
+        <GridActionsCellItem
+          icon={<EditIcon />}
+          label="Edit"
+          className="textPrimary"
+          onClick={handleEditClick(id)}
+          color="inherit"
+        />,
+        <GridActionsCellItem
+          icon={<DeleteIcon />}
+          label="Delete"
+          onClick={handleDeleteClick(id)}
+          color="inherit"
+        />,
+      ];
     },
-  ];
+  },
+];
+
+
   return (
     <Grid container className="pb-4" spacing={2}>
       <Grid item xs={8}>
-      {isLoading && <LinearProgress />} 
+        {isLoading && <LinearProgress />}
         <Item>
-        {message && message?.success && (
-            <Alert sx={{width: "100%"}}severity="success" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
+          {message && message?.success && (
+            <Alert sx={{ width: "100%" }} severity="success" style={{ marginTop: 8, maxHeight: 300, overflow: 'auto' }}>
               <div
                 dangerouslySetInnerHTML={{
                   __html: `<ul style="text-align: left;">${message?.success?.join(" ")}</ul>`
@@ -264,18 +236,9 @@ const OrderTable = ({dispatch}) => {
               />
             </Alert>
           )}
-          {message && message?.suggestion && (
-            <Alert sx={{width: "100%"}}severity="info" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.suggestion?.join(" ")}</ul>`
-                }}
-              />
-            </Alert>
-          )}
           <Box
             sx={{
-              height:"80vh",
+              height: "80vh",
               width: "100%",
               "& .actions": {
                 color: "text.secondary",
@@ -299,7 +262,6 @@ const OrderTable = ({dispatch}) => {
               rowModesModel={rowModesModel}
               onRowEditStart={handleRowEditStart}
               onRowEditStop={handleRowEditStop}
-              
               rowsPerPageOptions={[]}
               processRowUpdate={processRowUpdate}
               components={{
@@ -310,44 +272,21 @@ const OrderTable = ({dispatch}) => {
               }}
               experimentalFeatures={{ newEditingApi: true }}
               getRowClassName={(params) => {
-                if(params?.row?.free_stock)
-                {
-                  return clsx({'row-error':parseInt(params?.row?.quantity) > parseInt(params?.row?.free_stock)});
+                if (params?.row?.free_stock) {
+                  return clsx({ 'row-error': parseInt(params?.row?.quantity) > parseInt(params?.row?.free_stock) });
                 }
-               else {
                 return '';
-               }
               }}
             />
           </Box>
-          {message && message?.warning && (
-            <Alert sx={{width: "100%"}}severity="warning" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.warning?.join(" ")}</ul>`
-                }}
-              />
-            </Alert>
-          )}
-          {message && message?.error && (
-            <Alert sx={{width: "100%"}}severity="error" style={{ marginTop: 8,maxHeight: 300,overflow: 'auto'}}>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: `<ul style="text-align: left;">${message?.error?.join(" ")}</ul>`
-                }}
-              />
-            </Alert>
-          )}
         </Item>
       </Grid>
       <Grid item xs={4}>
-        <OrderSideBar/>
-        
+        <OrderSideBar />
       </Grid>
     </Grid>
   );
 };
-
 
 function mapStateToProps(state) {
   const { user } = state.auth;
