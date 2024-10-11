@@ -44,13 +44,14 @@ const OrderProvider = (props) => {
   const [finalList, setFinalList] = useState([]);
   const [message, setMessage] = useState(null);
   const [orderType, setOrderType] = useState("jaycar-au");
+  const [storeMode, setStoreMode] = useState("in-store");  // Track the selected mode
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(false);
-  
-  // State for managing the dialog visibility and content
-  const [openDialog, setOpenDialog] = useState(false);
+
+  const [openDialog, setOpenDialog] = useState(false); // State for dialog visibility
   const [highDiscountItems, setHighDiscountItems] = useState([]);
 
-  const submitOrderToDB = async (products, startDate, endDate, orderType) => {
+  // Function to submit order data to the backend
+  const submitOrderToDB = async (products, startDate, endDate, orderType, storeMode) => {
     try {
       for (const item of products) {
         const { part_number, quantity } = item;
@@ -61,6 +62,7 @@ const OrderProvider = (props) => {
           effective_date: startDate,
           end_date: endDate,
           orderType: orderType,
+          storeMode: storeMode,  // **Pass the storeMode**
         });
       }
 
@@ -71,7 +73,7 @@ const OrderProvider = (props) => {
     }
   };
 
-  // Fetch original price from backend based on item_code
+  // Fetch the original price from the backend based on the item_code
   const fetchOriginalPrice = async (part_number, orderType) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/get-original-price/${orderType}/${part_number}`); 
@@ -82,6 +84,7 @@ const OrderProvider = (props) => {
     }
   };
 
+  // Process CSV files uploaded
   const processCsv = (file) => {
     Papa.parse(file, {
       header: false,
@@ -133,17 +136,17 @@ const OrderProvider = (props) => {
   // Function to check if any discounts exceed 35%
   const checkDiscounts = () => {
     const itemsWithHighDiscounts = finalList.filter(item => {
-      const discountValue = parseFloat(item.discount.replace('%', '')); // Parse the discount value
-      return discountValue > 35; // Check for discounts above 35%
+      const discountValue = parseFloat(item.discount.replace('%', ''));
+      return discountValue > 35;
     });
 
     if (itemsWithHighDiscounts.length > 0) {
-      setHighDiscountItems(itemsWithHighDiscounts); // Store high discount items
-      setOpenDialog(true); // Open the dialog to warn the user
+      setHighDiscountItems(itemsWithHighDiscounts);
+      setOpenDialog(true); // Open warning dialog if discounts exceed 35%
     }
   };
 
-  // Process Data: Only validate and prepare the data
+  // Process Data: Validate and prepare data
   const handleProcess = (startDate, endDate) => {
     if (!finalList.length || !selectedValues.items?.length) {
       toast.error("Please upload a proper file first.");
@@ -152,19 +155,20 @@ const OrderProvider = (props) => {
       return;
     }
 
-    checkDiscounts(); // Call the checkDiscounts function
+    checkDiscounts(); // Check for discounts above 35%
 
     toast.success("Data is ready for submission.");
     setIsSubmitEnabled(true);
   };
 
+  // Function to submit the data
   const handleSubmit = (startDate, endDate, orderType) => {
     if (!finalList.length) {
       toast.error("No data available to submit.");
       return;
     }
 
-    submitOrderToDB(finalList, startDate, endDate, orderType);
+    submitOrderToDB(finalList, startDate, endDate, orderType, storeMode);  // **Pass storeMode**
   };
 
   return (
@@ -183,38 +187,39 @@ const OrderProvider = (props) => {
         setOrderType,
         isSubmitEnabled,
         setIsSubmitEnabled,
+        storeMode,       // Add storeMode to context
+        setStoreMode,    // Add setStoreMode to context
       }}
     >
       {props.children}
 
       {/* Dialog for high discount warning */}
       <Dialog
-  open={openDialog}
-  onClose={() => setOpenDialog(false)}
-  aria-labelledby="discount-warning-title"
->
-  <DialogTitle id="discount-warning-title">Warning: High Discounts</DialogTitle>
-  <DialogContent>
-    <p>The following items have a discount greater than 35%:</p>
-    <ul>
-      {highDiscountItems.map(item => (
-        <li key={item.id}>
-          {item.part_number}: {item.discount} discount
-        </li>
-      ))}
-    </ul>
-    {/* Additional message to disregard if data is valid */}
-    <p style={{ marginTop: '16px', fontWeight: 'bold' }}>
-      If the data is valid, please disregard this warning and click the submit button to proceed.
-    </p>
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setOpenDialog(false)} color="primary">
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
-
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        aria-labelledby="discount-warning-title"
+      >
+        <DialogTitle id="discount-warning-title">Warning: High Discounts</DialogTitle>
+        <DialogContent>
+          <p>The following items have a discount greater than 35%:</p>
+          <ul>
+            {highDiscountItems.map(item => (
+              <li key={item.id}>
+                {item.part_number}: {item.discount} discount
+              </li>
+            ))}
+          </ul>
+          {/* Additional message */}
+          <p style={{ marginTop: '16px', fontWeight: 'bold' }}>
+            If the data is valid, please disregard this warning and click the submit button to proceed.
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </OrderContext.Provider>
   );
 };

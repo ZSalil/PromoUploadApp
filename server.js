@@ -7,6 +7,7 @@ const express = require('express');
 const sql = require('mssql');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');  // Import path for serving React build
 
 const app = express();
 const port = 5000;
@@ -43,17 +44,30 @@ const getDatabaseConfig = (orderType) => {
     };
 };
 
-// Function to get branch numbers based on orderType
-const getBranchRange = (orderType) => {
-    switch (orderType) {
-        case 'jaycar-au':
-            return { start: 400, end: 512 }; // Branch range for Jaycar AU
-        case 'jaycar-nz':
-            return { start: 203, end: 224 }; // Branch range for Jaycar NZ
-        case 'rtm':
-            return { start: 304, end: 343 }; // Branch range for RTM
-        default:
-            throw new Error('Invalid company type');
+// Function to get specific branches based on orderType and storeMode
+const getBranches = (orderType, storeMode) => {
+    if (storeMode === 'online') {
+        switch (orderType) {
+            case 'jaycar-au':
+                return [400, 409]; // Online-specific branches for Jaycar AU
+            case 'jaycar-nz':
+                return [200, 209]; // Online-specific branches for Jaycar NZ
+            case 'rtm':
+                return [300, 399]; // Online-specific branches for RTM
+            default:
+                throw new Error('Invalid company type');
+        }
+    } else { // In-store mode
+        switch (orderType) {
+            case 'jaycar-au':
+                return Array.from({ length: 512 - 400 + 1 }, (_, i) => 400 + i); // All in-store branches for Jaycar AU
+            case 'jaycar-nz':
+                return Array.from({ length: 224 - 203 + 1 }, (_, i) => 203 + i); // All in-store branches for Jaycar NZ
+            case 'rtm':
+                return Array.from({ length: 343 - 304 + 1 }, (_, i) => 304 + i); // All in-store branches for RTM
+            default:
+                throw new Error('Invalid company type');
+        }
     }
 };
 
@@ -63,12 +77,10 @@ app.get('/', (req, res) => {
 });
 
 // Endpoint to get original price based on item_code and orderType
-// Route to get original price based on orderType and item_code
 app.get('/api/get-original-price/:orderType/:item_code', async (req, res) => {
-    
     const { item_code, orderType } = req.params;
     console.log('Fetching price for item_code:', item_code, 'and orderType:', orderType);
-    
+
     try {
         const dbConfig = getDatabaseConfig(orderType); // Dynamically get dbConfig for orderType
         const pool = await sql.connect(dbConfig);
@@ -97,17 +109,16 @@ app.get('/api/get-original-price/:orderType/:item_code', async (req, res) => {
     }
 });
 
-
 // Route to insert item and price into the PRICE_PENDING table for both P1 and P2 price types for each branch
 app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
-    const { item_code, price, effective_date, end_date, orderType } = req.body;  // Accept the orderType (company type) from the request
+    const { item_code, price, effective_date, end_date, orderType, storeMode } = req.body;  // Accept the orderType (company type) and storeMode (online or in-store)
 
     try {
         // Get the correct database configuration based on the company selected
         const dbConfig = getDatabaseConfig(orderType);
 
-        // Get the correct branch range for the selected company
-        const { start, end } = getBranchRange(orderType);
+        // Get the correct branches based on the selected company and store mode
+        const branches = getBranches(orderType, storeMode);
 
         // Adjust the effective_date and end_date by 4 minutes (240,000 milliseconds)
         const adjustedEffectiveDate = new Date(new Date(effective_date).getTime() + 4 * 60000);  // 4 minutes ahead
@@ -116,9 +127,8 @@ app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
         // Connect to the database for this specific request
         const pool = await sql.connect(dbConfig);
 
-        // Loop through the specific branch range
-        for (let branch_no = start; branch_no <= end; branch_no++) {
-
+        // Insert prices for each branch
+        for (const branch_no of branches) {
             // Insert for price_type P1 first
             const queryP1 = `
                 INSERT INTO [dbo].[PRICE_PENDING]
@@ -126,8 +136,6 @@ app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
                 VALUES
                 (@item_code, @branch_no, 0, 'SS', 'P1', @adjustedEffectiveDate, @price, 0, @adjustedEndDate, 1, 0, 0, 0, 0, 0, GETDATE(), '', '', 0, 'HO', 0, 0, 0, '');
             `;
-
-            // Execute the query for price_type P1
             await pool.request()
                 .input('item_code', sql.VarChar, item_code)
                 .input('branch_no', sql.Int, branch_no)
@@ -136,8 +144,6 @@ app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
                 .input('adjustedEndDate', sql.DateTime, adjustedEndDate)
                 .query(queryP1);
 
-            console.log(`Inserted P1 price for branch ${branch_no}`);
-
             // Insert for price_type P2 after P1
             const queryP2 = `
                 INSERT INTO [dbo].[PRICE_PENDING]
@@ -145,8 +151,6 @@ app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
                 VALUES
                 (@item_code, @branch_no, 0, 'SS', 'P2', @adjustedEffectiveDate, @price, 0, @adjustedEndDate, 1, 0, 0, 0, 0, 0, GETDATE(), '', '', 0, 'HO', 0, 0, 0, '');
             `;
-
-            // Execute the query for price_type P2 after P1
             await pool.request()
                 .input('item_code', sql.VarChar, item_code)
                 .input('branch_no', sql.Int, branch_no)
@@ -155,7 +159,7 @@ app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
                 .input('adjustedEndDate', sql.DateTime, adjustedEndDate)
                 .query(queryP2);
 
-            console.log(`Inserted P2 price for branch ${branch_no}`);
+            console.log(`Inserted P1 and P2 prices for branch ${branch_no} (${storeMode} mode)`);
         }
 
         // Close the connection pool after completing the request
@@ -168,6 +172,16 @@ app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
+//  serve the React build
+app.use(express.static(path.join(__dirname, 'build')));
+
+// For any requests that don't match API routes, serve the React app
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + '/build/index.html'));
+});
+// Start the server
+app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
 });
+
+

@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import Stack from "@mui/material/Stack";
-import { DatePicker } from "@mui/x-date-pickers";
-import { LocalizationProvider } from "@mui/x-date-pickers";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";  // Correct imports from @mui/x-date-pickers
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import TextField from "@mui/material/TextField";
@@ -17,12 +16,12 @@ import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import DownloadForOfflineIcon from "@mui/icons-material/DownloadForOffline";
 import IconButton from "@mui/material/IconButton";
-import LinearProgress from "@mui/material/LinearProgress"; // Import LinearProgress for loading bar
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline"; // Import Help icon
+import LinearProgress from "@mui/material/LinearProgress";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { OrderContext } from "./OrderProvider";
 import { toast } from "react-toastify";
 
-dayjs.locale("en-gb"); // Set locale to British English for dd/mm/yyyy format
+dayjs.locale("en-gb");
 
 const OrderSideBar = () => {
   const {
@@ -34,17 +33,18 @@ const OrderSideBar = () => {
     setOrderType,
     isSubmitEnabled,
     setIsSubmitEnabled,
+    storeMode,
+    setStoreMode,
   } = useContext(OrderContext);
 
   const [startDate, setStartDate] = useState(dayjs());
   const [endDate, setEndDate] = useState(dayjs());
   const [startDateError, setStartDateError] = useState("");
   const [endDateError, setEndDateError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateDates = () => {
     let isValid = true;
-
     if (!startDate) {
       setStartDateError("Start date is required");
       toast.error("Start date is required");
@@ -56,7 +56,6 @@ const OrderSideBar = () => {
     } else {
       setStartDateError("");
     }
-
     if (!endDate) {
       setEndDateError("End date is required");
       toast.error("End date is required");
@@ -72,7 +71,6 @@ const OrderSideBar = () => {
     } else {
       setEndDateError("");
     }
-
     return isValid;
   };
 
@@ -95,9 +93,19 @@ const OrderSideBar = () => {
     setIsSubmitEnabled(false);
   };
 
+  const handleStoreModeChange = (event, newStoreMode) => {
+    setStoreMode(newStoreMode);
+    setIsSubmitEnabled(false);
+  };
+
   const handleProcessData = async () => {
     if (!orderType) {
       toast.error("You must select a company before processing data.");
+      return;
+    }
+
+    if (!storeMode) {
+      toast.error("Please select a mode (Online or In-store) before continuing.");
       return;
     }
 
@@ -107,11 +115,7 @@ const OrderSideBar = () => {
         return;
       }
 
-      console.log("Start Date:", startDate.format("YYYY-MM-DD"));
-      console.log("End Date:", endDate.format("YYYY-MM-DD"));
-
       handleProcess(startDate.format("YYYY-MM-DD"), endDate.format("YYYY-MM-DD"));
-
       setIsSubmitEnabled(true);
     }
   };
@@ -122,20 +126,19 @@ const OrderSideBar = () => {
       return;
     }
 
-    setIsSubmitting(true); // Show loading bar
+    if (!storeMode) {
+      toast.error("Please select a mode (Online or In-store) before submitting.");
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      console.log("Order Type on Submit:", orderType);
-
-      // Simulate a short delay for submission (for demonstration)
-      await new Promise((resolve) => setTimeout(resolve, 13000)); 
-
       await handleSubmit(startDate.format("YYYY-MM-DD"), endDate.format("YYYY-MM-DD"), orderType);
-      
       toast.success("Uploading to database.");
     } catch (error) {
       toast.error("Failed to update the database.");
     } finally {
-      setIsSubmitting(false); // Hide loading bar after completion
+      setIsSubmitting(false);
     }
   };
 
@@ -159,13 +162,25 @@ const OrderSideBar = () => {
         </Typography>
 
         <Typography variant="body1" color="textSecondary" gutterBottom>
-          Welcome to the JEG Promo Uploader. Please select a company to continue.
+          Welcome to the JEG Promo Uploader. Please select a company and mode to continue.
         </Typography>
 
+        {/* Add Store Mode Selection */}
         <FormControl>
-          <FormLabel id="demo-controlled-radio-buttons-group" className="fw-bold">
-            Select Company
-          </FormLabel>
+          <FormLabel className="fw-bold">Promo Type</FormLabel>
+          <ToggleButtonGroup
+            color="primary"
+            value={storeMode}
+            exclusive
+            onChange={handleStoreModeChange}
+          >
+            <ToggleButton value="online">Online</ToggleButton>
+            <ToggleButton value="in-store">In-store</ToggleButton>
+          </ToggleButtonGroup>
+        </FormControl>
+
+        <FormControl>
+          <FormLabel className="fw-bold">Select Company</FormLabel>
           <ToggleButtonGroup
             color="primary"
             value={orderType}
@@ -177,7 +192,7 @@ const OrderSideBar = () => {
             <ToggleButton value="rtm">RTM</ToggleButton>
           </ToggleButtonGroup>
         </FormControl>
-        
+
         <DragAndDrop />
 
         <DatePicker
@@ -199,7 +214,7 @@ const OrderSideBar = () => {
           format="YYYY-MM-DD"
         />
 
-        {isSubmitting && <LinearProgress />} {/* Show loading bar during submission */}
+        {isSubmitting && <LinearProgress />}
 
         <LoadingButton
           onClick={handleProcessData}
@@ -207,19 +222,19 @@ const OrderSideBar = () => {
           loading={isLoading}
           loadingPosition="end"
           variant="contained"
+          disabled={!storeMode} // Disable button if no mode is selected
         >
           Process Data
         </LoadingButton>
 
         <Button
           variant="contained"
-          disabled={!isSubmitEnabled || isSubmitting} // Disable during submission
+          disabled={!isSubmitEnabled || isSubmitting || !storeMode} // Disable button if no mode is selected
           onClick={handleSubmitData}
         >
           Submit
         </Button>
 
-        {/* Help Me Button */}
         <Button
           variant="outlined"
           color="primary"

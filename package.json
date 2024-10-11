@@ -1,6 +1,6 @@
 {
   "name": "reactjs-redeemed-order",
-  "homepage": "/order-uploader",
+  "homepage": "/promo-uploader",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

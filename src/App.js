@@ -53,7 +53,7 @@ axios.interceptors.response.use(
   },
   (err) => {
     if (err.response.status === 401) {
-      <Navigate to="order-uploader/login" />
+      <Navigate to="promo-uploader/login" />
     }
 
     return Promise.reject(err);
