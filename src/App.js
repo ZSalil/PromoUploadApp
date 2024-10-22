@@ -115,7 +115,7 @@ class App extends Component {
           <Routes>
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/login" element={<Login />} /> 
-            <Route path="/order" element={<Order />} />
+            <Route path="/promo-upload" element={<Order />} />
             <Route path="/multi-order" element={<ProtectedRoute><WholesaleOrder /></ProtectedRoute>} />
             <Route path="/logout" element={<LogOut />} />
           </Routes>

@@ -167,7 +167,7 @@ app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
 
         res.json({ success: true, message: 'Item and price inserted successfully for all branches and price types' });
     } catch (err) {
-        console.error('Error inserting item:', err);
+        console.error('Error inserting item:', err);e
         res.status(500).json({ success: false, message: 'Failed to insert item and price', error: err.message });
     }
 });
@@ -175,7 +175,7 @@ app.post('/api/v1/promo-uploader/insert-item', async (req, res) => {
 //  serve the React build
 app.use(express.static(path.join(__dirname, 'build')));
 
-// For any requests that don't match API routes, serve the React app
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname + '/build/index.html'));
 });
@@ -183,5 +183,3 @@ app.get('*', (req, res) => {
 app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
 });
-
-
