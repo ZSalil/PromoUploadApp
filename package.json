@@ -1,6 +1,6 @@
 {
   "name": "reactjs-redeemed-order",
-  "homepage": "/promo-uploader",
+  "homepage": "/promo-upload",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -21,7 +21,8 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
-    "ajv": "^8.17.1",
+    "ajv": "^6.12.6",
+    "ajv-keywords": "^3.5.2",
     "axios": "^0.27.2",
     "bootstrap": "^5.1.3",
     "caniuse-lite": "^1.0.30001489",
@@ -39,7 +40,7 @@
     "react-dropzone": "^14.2.1",
     "react-redux": "^8.0.1",
     "react-router-dom": "^6.3.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "react-table": "^7.8.0",
     "react-toastify": "^9.0.1",
     "react-validation": "^3.0.7",

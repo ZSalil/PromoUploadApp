@@ -56,7 +56,7 @@ const OrderProvider = (props) => {
       for (const item of products) {
         const { part_number, quantity } = item;
 
-        await axios.post("http://localhost:5000/api/v1/promo-uploader/insert-item", {
+        await axios.post("https://devhoappsvr.dev.jeg.systems/promo-upload-api/api/v1/promo-uploader/insert-item", {
           item_code: part_number,
           price: quantity,
           effective_date: startDate,
@@ -76,7 +76,7 @@ const OrderProvider = (props) => {
   // Fetch the original price from the backend based on the item_code
   const fetchOriginalPrice = async (part_number, orderType) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/get-original-price/${orderType}/${part_number}`); 
+      const response = await axios.get(`https://devhoappsvr.dev.jeg.systems/promo-upload-api/api/get-original-price/${orderType}/${part_number}`); 
       return response.data.originalPrice;
     } catch (error) {
       console.error("Error fetching original price:", error);
